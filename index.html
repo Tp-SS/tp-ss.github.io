@@ -3,37 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TpSS Web</title>
+    <title>TpSS Portfolio</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f0f0f0;
-            margin: 0;
+            color: #fff;
+            background-color: #000;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             padding: 20px;
         }
-        img {
-            max-width: 100%;
-            height: auto;
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
         }
-        a {
-            color: #007bff;
+
+        header h1 {
+            font-size: 2.5em;
+            color: #fff;
+        }
+
+        header p {
+            font-size: 1em;
+            color: #aaa;
+        }
+
+        section {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #ddd;
+            border-bottom: 2px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .bio {
+            text-align: center;
+            font-size: 1.1em;
+            color: #bbb;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+        }
+
+        .gallery img {
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #333;
+        }
+
+        .spotify {
+            text-align: center;
+        }
+
+        .spotify a {
             text-decoration: none;
-            font-weight: bold;
+            color: #fff;
+            background-color: #1db954;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            transition: background-color 0.3s;
         }
-        a:hover {
-            text-decoration: underline;
+
+        .spotify a:hover {
+            background-color: #14833b;
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <h1>Bienvenido a mi Página Web</h1>
-    <p>Fotos y mi lista de Spotify:</p>
-    <img src="https://via.placeholder.com/400" alt="Ejemplo de foto">
-    <p>
-        <a href="https://open.spotify.com/user/tu_usuario" target="_blank">
-            Mi Lista de Spotify
-        </a>
-    </p>
+    <header>
+        <h1>Welcome to TpSS's World</h1>
+        <p>Minimalism is the ultimate sophistication.</p>
+    </header>
+
+    <section class="bio">
+        <h2>About Me</h2>
+        <p>Hello! I'm TpSS, a passionate developer and lifelong gaming enthusiast. Welcome to my personal space on the web!</p>
+    </section>
+
+    <section class="gallery">
+        <h2>Photo Gallery</h2>
+        <div class="gallery">
+            <img src="https://via.placeholder.com/150" alt="Photo 1">
+            <img src="https://via.placeholder.com/150" alt="Photo 2">
+            <img src="https://via.placeholder.com/150" alt="Photo 3">
+            <img src="https://via.placeholder.com/150" alt="Photo 4">
+        </div>
+    </section>
+
+    <section class="spotify">
+        <h2>My Spotify Playlist</h2>
+        <a href="https://open.spotify.com/user/yourusername" target="_blank">Listen Now</a>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 TpSS. All rights reserved.</p>
+    </footer>
 </body>
 </html>
