@@ -19,7 +19,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             min-height: 100vh;
             padding: 20px;
         }
@@ -59,6 +59,16 @@
             color: #bbb;
         }
 
+        .contacts {
+            list-style: none;
+            font-size: 1.1em;
+            color: #aaa;
+        }
+
+        .contacts li {
+            margin-bottom: 10px;
+        }
+
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -89,22 +99,51 @@
             background-color: #14833b;
         }
 
+        .specs {
+            font-size: 1.1em;
+            color: #aaa;
+        }
+
         footer {
             margin-top: 20px;
             font-size: 0.9em;
             color: #666;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.2em;
+            }
+
+            .spotify a {
+                font-size: 1em;
+                padding: 8px 15px;
+            }
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Welcome to TpSS's World</h1>
-        <p>Minimalism is the ultimate sophistication.</p>
+        <p>Professional | Ambitious | Minimalist</p>
     </header>
 
     <section class="bio">
         <h2>About Me</h2>
-        <p>Hello! I'm TpSS, a passionate developer and lifelong gaming enthusiast. Welcome to my personal space on the web!</p>
+        <p>A student of IT with professional experience and over 5 years of dedicated study.</p>
+    </section>
+
+    <section class="contacts">
+        <h2>Contact & Socials</h2>
+        <ul>
+            <li>Steam + PS: <strong>Tp_SS</strong></li>
+            <li>Discord: <strong>Tp_SS_</strong></li>
+            <li>Email: <strong><a href="mailto:tpss4@protonmail.com">tpss4@protonmail.com</a></strong></li>
+        </ul>
     </section>
 
     <section class="gallery">
@@ -120,6 +159,18 @@
     <section class="spotify">
         <h2>My Spotify Playlist</h2>
         <a href="https://open.spotify.com/user/yourusername" target="_blank">Listen Now</a>
+    </section>
+
+    <section class="specs">
+        <h2>PC Specs</h2>
+        <p>Here you can add the details about your PC specs:</p>
+        <ul>
+            <li><strong>CPU:</strong> [Your CPU]</li>
+            <li><strong>GPU:</strong> [Your GPU]</li>
+            <li><strong>RAM:</strong> [Your RAM]</li>
+            <li><strong>Storage:</strong> [Your Storage]</li>
+            <li><strong>Motherboard:</strong> [Your Motherboard]</li>
+        </ul>
     </section>
 
     <footer>
