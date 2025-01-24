@@ -3,180 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tp</title>
-    <link rel="icon" href="https://tp-ss.github.io/PFP2024+.jpg" type="image/jpeg">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Terminal Style Template</title>
     <style>
-        :root {
-            --background-color: #ffffff;
-            --text-color: #000000;
-            --accent-color: #7f7f7f;
-            --hover-color: #d9d9d9;
-            --font-family: 'Montserrat', sans-serif;
-        }
-
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-family);
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            margin: 0;
-            overflow-x: hidden;
-        }
-
-        header {
-            text-align: center;
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--accent-color);
+            font-family: 'Courier New', Courier, monospace;
+            background: url('https://tp-ss.github.io/25.gif') no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
             display: flex;
-            align-items: center;
             justify-content: center;
-            gap: 0.8rem;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        header img {
-            width: 50px;
-            height: 50px;
-            border-radius: 0%;
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
         }
 
-        header h1 {
-            font-weight: 700;
+        .header img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
         }
 
-        section {
-            padding: 3rem 1.5rem;
-            max-width: 900px;
-            margin: 0 auto;
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
         }
 
-        .card {
-            border: 1px solid var(--accent-color);
+        .terminal {
+            width: 95%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #888888;
+            padding: 15px;
             border-radius: 10px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            background-color: var(--background-color);
-        }
-
-        .card h2 {
-            margin-bottom: 1rem;
+            margin: 20px;
         }
 
         .spotify {
-            text-align: center;
-            margin-top: 1rem;
+            width: 95%;
+            max-width: 600px;
+            margin: 20px;
         }
 
-        .spotify iframe {
-            width: 100%;
-            max-width: 600px;
-            height: 80px;
+        .line {
+            margin: 8px 0;
+        }
+
+        .label {
+            color: #999999;
+        }
+
+        .value {
+            color: #ffffff;
+        }
+
+        .blinking {
+            animation: blink 1s steps(2, start) infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #444;
+            color: #fff;
             border: none;
             border-radius: 5px;
-            margin: 1rem auto;
+            cursor: pointer;
+            font-size: 14px;
         }
 
-        .spotify a {
-            display: inline-block;
-            margin-top: 1rem;
-            padding: 0.7rem 1.5rem;
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
-            border-radius: 5px;
-            text-decoration: none;
-            background-color: var(--background-color);
-            transition: background-color 0.3s, color 0.3s;
+        button:hover {
+            background-color: #666;
         }
 
-        .spotify a:hover {
-            background-color: var(--text-color);
-            color: var(--background-color);
-        }
-
-        footer {
-            text-align: center;
-            padding: 2rem;
-            border-top: 1px solid var(--accent-color);
-            font-size: 0.875rem;
-        }
-
-        @media (max-width: 768px) {
-            section {
-                padding: 2rem 1rem;
+        @media screen and (max-width: 768px) {
+            .terminal, .spotify {
+                font-size: 14px;
+                padding: 10px;
+                margin: 15px;
             }
 
-            .spotify iframe {
-                height: 100px;
+            .header img {
+                width: 60px;
+                height: 60px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .terminal, .spotify {
+                font-size: 12px;
+                padding: 10px;
+                margin: 10px auto;
+                width: 90%;
+            }
+
+            .header img {
+                width: 50px;
+                height: 50px;
+            }
+
+            .header h1 {
+                font-size: 16px;
             }
         }
     </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const terminal = document.querySelector(".terminal");
+            const lines = [
+                () => `<span class='label'>C:\\Users\\Tp>TIME</span> <span class='value'>${new Date().toLocaleTimeString()}</span>`,
+                () => `<span class='label'>C:\\Users\\Tp>DATE</span> <span class='value'>${new Date().toLocaleDateString()}</span>`,
+                () => `<span class='label'>C:\\Users\\Tp>DAY</span> <span class='value'>[${new Date().toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase()}]</span>`,
+                () => `<span class='label'>C:\\Users\\Tp>LOG</span> <span class='value'>Nothing is true.</span>`
+            ];
+
+            let delay = 0;
+
+            lines.forEach((lineGenerator, index) => {
+                setTimeout(() => {
+                    const newLine = document.createElement("div");
+                    newLine.className = "line";
+                    newLine.innerHTML = lineGenerator();
+                    terminal.appendChild(newLine);
+
+                    if (index === lines.length - 1) {
+                        const cursor = document.createElement("span");
+                        cursor.className = "blinking";
+                        cursor.textContent = "|";
+                        terminal.appendChild(cursor);
+                    }
+                }, delay);
+
+                delay += 600; // Slightly slower delay (600ms per line)
+            });
+        });
+    </script>
 </head>
 <body>
-    <header>
-        <img src="https://tp-ss.github.io/PFP2024+.jpg" alt="Logo TP">
+    <div class="header">
+        <img src="https://tp-ss.github.io/PFP2025.jpg" alt="Logo">
         <h1>Tp</h1>
-    </header>
-
-    <main>
-        <section id="bio">
-            <div class="card">
-                <h2>¿?</h2>
-                <p>~</p>
-            </div>
-        </section>
-
-        <section id="playlist">
-            <div class="card">
-                <h2>THE PLAYLIST</h2>
-                <div class="spotify">
-                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/5Kb0NPgMvWJmwufHU1q0Tf?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-                    <a href="https://open.spotify.com/playlist/5Kb0NPgMvWJmwufHU1q0Tf?si=5c1f181e27524768" target="_blank">Listen on Spotify</a>
-                </div>
-            </div>
-        </section>
-
-        <section id="specs">
-            <div class="card">
-                <h2>PC SPECS</h2>
-                <div>
-                    <h3>CPU</h3>
-                    <p>Intel Core i5-12400</p>
-                    <h3>GPU</h3>
-                    <p>Zotac Gaming GeForce RTX 4060 Twin Edge 8GB</p>
-                    <h3>MOBO</h3>
-                    <p>MSI PRO B660M-A WIFI DDR4</p>
-                    <h3>RAM</h3>
-                    <p>Kingston FURY Beast DDR4 3200 MHz 16GB 2x8GB CL16</p>
-                    <h3>SSD</h3>
-                    <p>WD BLACK SN770 1TB SSD PCIe Gen4 NVMe</p>
-                    <h3>PSU</h3>
-                    <p>MSI MAG A550BN 550W 80 Plus Bronze</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="contact">
-            <div class="card">
-                <h2>CONTACT</h2>
-                <div>
-                    <p>Email: tpss4@protonmail.com</p>
-                    <p>Discord: tp_ss_</p>
-                    <p>Steam: Tp_SS_-</p>
-                    <p>PlayStation: Tp_SS_-</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <p>0101010001110000</p>
-    </footer>
+    </div>
+    <div class="terminal"></div>
+        <div class="terminal">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0hJ3rZ2RT3oGe41CehYadY?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        <button onclick="window.open('https://open.spotify.com/playlist/0hJ3rZ2RT3oGe41CehYadY?si=80659b50056741f4', '_blank')">2125 - Listen On Spotify</button>
+    </div>
+    <div class="terminal">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/5Kb0NPgMvWJmwufHU1q0Tf?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        <button onclick="window.open('https://open.spotify.com/playlist/5Kb0NPgMvWJmwufHU1q0Tf?si=6adef6f0d6a940b7', '_blank')">2024 - Listen On Spotify</button>
+    </div>
 </body>
 </html>
