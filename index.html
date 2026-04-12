@@ -670,8 +670,9 @@ input[type=range]::-moz-range-thumb{
 <script>
 'use strict';
 /* ══════════════════════════════════════════════════
-   SURVIVAL VIEWER v2 — Core Logic
-   Science-grounded. Context-aware. Habit-coherent.
+   SURVIVAL VIEWER v2 — Fixed JS
+   No triple-nested template literals.
+   All HTML built via helper fns + string concat.
 ══════════════════════════════════════════════════ */
 
 // ── STORAGE ────────────────────────────────────────
@@ -690,8 +691,8 @@ function dk(d){return d.toISOString().slice(0,10)}
 function addD(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r}
 function isToday(d){return dk(d)===dk(today())}
 function isWeekend(d){return[0,6].includes(d.getDay())}
-function fmtFull(d){return`${WDAYS[d.getDay()]}, ${MONS[d.getMonth()]} ${d.getDate()}`}
-function fmtShort(d){return`${d.getDate()} ${MONS_S[d.getMonth()]}`}
+function fmtFull(d){return WDAYS[d.getDay()]+', '+MONS[d.getMonth()]+' '+d.getDate()}
+function fmtShort(d){return d.getDate()+' '+MONS_S[d.getMonth()]}
 function thisYear(){return today().getFullYear()}
 
 (function setSbDate(){
@@ -699,131 +700,95 @@ function thisYear(){return today().getFullYear()}
   const d=today();
   const dd=String(d.getDate()).padStart(2,'0');
   const mm=String(d.getMonth()+1).padStart(2,'0');
-  el.textContent=`${dd}.${mm}.${d.getFullYear()} ${WDAYS[d.getDay()].slice(0,3).toUpperCase()}`;
+  el.textContent=dd+'.'+mm+'.'+d.getFullYear()+' '+WDAYS[d.getDay()].slice(0,3).toUpperCase();
 })();
 
 /* ══════════════════════════════════════════════════
-   HABIT DEFINITIONS — Science-grounded, context-aware
-   
-   SOURCES:
-   Sleep: Walker (2017) Why We Sleep; NSF; Cappuccio meta-analysis (2010)
-   Hydration: EFSA (2.5L/day men); Cheuvront & Kenefick (2014) dehydration cognition
-   Sugar: WHO <10% free sugars of daily energy intake; Hall et al. (2019) ultra-processed RCT
-   Exercise: WHO 150min/week moderate; Mammen & Faulkner (2013) depression meta-analysis
-   Pornography: Kühn & Gallinat (2014) structural brain; Love et al. (2015) dopamine dysreg
-   Social: Holt-Lunstad et al. (2015) — loneliness risk equiv. 15 cig/day
-   Dopamine hygiene: Lembke (2021) Dopamine Nation; Newport (2019) Digital Minimalism
-   Alcohol: IARC Group 1 carcinogen; Ebrahim et al. (2013) alcohol-REM suppression
-   Reading: Mar et al. (2009) narrative transportation; even 5-10 pgs/day
-   Meals: Jakubowicz et al. (2013) meal timing & glucose; Pot et al. (2016) meal skipping cortisol
+   HABIT DEFINITIONS
+   Sources cited inline in hint fields.
 ══════════════════════════════════════════════════ */
-
-// Day type context — determines baseline expectations
-// Workday = less free time → less penalty for yt/social
-// Free day = full capacity → stricter on habits like reading, social, creativity
-
-const HAB_GROUPS = [
-  {
-    id:'context',
-    label:'CONTEXT',
-    icon:'◈',
-    habits:[
-      {id:'daytype',   label:'Day type',       type:'sel',
-       opts:['workday','free day','half-free','travel day','sick day'],
-       weight:0, hint:'Adjusts score baseline — workday tasks ≠ free day tasks'},
-      {id:'alcohol_amt',label:'Drinks today',   type:'qty', unit:'drinks', max:8, default:0,
-       weight:0, color:'red', hint:'0 = none. Tracked without judgment. Penalty applied to score (IARC Group 1 carcinogen, REM suppressor)'},
-    ]
-  },
-  {
-    id:'body',
-    label:'BODY',
-    icon:'◉',
-    habits:[
-      {id:'water',     label:'Water intake',   type:'qty',  unit:'glasses',max:14, default:0,
-       weight:10, color:'blu',
-       hint:'EFSA: 2.5L/day men (≈10-11 glasses). Dehydration >2% body weight impairs cognition (Cheuvront & Kenefick, 2014)'},
-      {id:'meals',     label:'Meals eaten',    type:'qty',  unit:'meals',  max:5,  default:0,
-       weight:8, color:'acc',
-       hint:'3 balanced meals = optimal. Skipping meals raises cortisol & impairs glucose regulation (Pot et al., 2016)'},
-      {id:'exercise',  label:'Moved body',     type:'bool', weight:12, color:'grn',
-       hint:'WHO: 150min/week moderate-intensity. Even one session: ↓26% depression risk (Mammen & Faulkner, 2013)'},
-      {id:'nosugar',   label:'Avoided sugar/cravings', type:'bool', weight:9, color:'grn',
-       hint:'WHO: free sugars <10% daily energy. Cravings are managed by stable glucose (not willpower alone)'},
-      {id:'noultra',   label:'No ultra-processed',  type:'bool', weight:8, color:'grn',
-       hint:'NOVA classification. Hall et al. (2019) RCT: ultra-processed → +500 kcal/day unintentionally; linked to depression'},
-      {id:'noalcohol', label:'Alcohol-free day',     type:'bool', weight:11, color:'grn',
-       hint:'IARC Group 1 carcinogen. Even 1 drink suppresses REM sleep (Ebrahim et al., 2013). Any amount: risk.'},
-      {id:'hygiene',   label:'Full hygiene routine', type:'bool', weight:5, color:'acc',
-       hint:'Shower, teeth, grooming. Behavioral activation signal — physical self-care anchors identity (Martell et al., 2010)'},
-    ]
-  },
-  {
-    id:'mind',
-    label:'MIND',
-    icon:'◎',
-    habits:[
-      {id:'outside',   label:'Time outside',   type:'bool', weight:8, color:'grn',
-       hint:'Natural light anchors circadian rhythm. Bratman et al. (2015): nature walk ↓ rumination vs urban walk. Min 20min.'},
-      {id:'noporn',    label:'No pornography', type:'bool', weight:10, color:'grn',
-       hint:'Kühn & Gallinat (2014): habitual use → reduced striatum volume (reward center). Dampens real-world motivation.'},
-      {id:'noyt',      label:'Avoided binge-YouTube', type:'bool', weight:7, color:'acc',
-       hint:'Variable reward loops (autoplay) chronically lower focus baseline. 1h intentional viewing >> 3h passive (Newport, 2019)'},
-      {id:'reading',   label:'Read today (≥5 pgs)', type:'bool', weight:6, color:'acc',
-       hint:'Even 5–10 pages/day compounds. Mar et al. (2009): narrative reading builds empathy & sustained focus tolerance.'},
-      {id:'creative',  label:'Creative work',  type:'bool', weight:7, color:'acc',
-       hint:'Agency + mastery → intrinsic motivation (Deci & Ryan SDT, 2000). Making something = dopamine from effort, not stimulus.'},
-      {id:'social_q',  label:'Social quality',  type:'sel',
-       opts:['none','brief (hi/bye)','meaningful (real talk)','deep (vulnerable)'],
-       weight:10, color:'acc',
-       hint:'Holt-Lunstad (2015): quality > quantity. Loneliness ≡ 15 cigarettes/day health risk. Deep > meaningful > brief > none.'},
-    ]
-  },
+const HAB_GROUPS=[
+  {id:'context',label:'CONTEXT',habits:[
+    {id:'daytype',    label:'Day type',      type:'sel',
+     opts:['workday','free day','half-free','travel day','sick day'],
+     weight:0, hint:'Adjusts score baseline — workday tasks differ from free days'},
+    {id:'alcohol_amt',label:'Drinks today',  type:'qty',unit:'drinks',max:8,default:0,
+     weight:0,color:'red', hint:'0=none. Dose-dependent penalty on score. IARC Group 1 carcinogen. Suppresses REM (Ebrahim et al., 2013)'},
+  ]},
+  {id:'body',label:'BODY',habits:[
+    {id:'water',    label:'Water intake',        type:'qty',unit:'glasses',max:14,default:0,
+     weight:10,color:'blu', hint:'EFSA: 2.5L/day men (~10-11 glasses). >2% dehydration impairs cognition (Cheuvront & Kenefick, 2014)'},
+    {id:'meals',    label:'Meals eaten',          type:'qty',unit:'meals',max:5,default:0,
+     weight:8,color:'acc', hint:'3 meals = optimal. Skipping raises cortisol & impairs glucose regulation (Pot et al., 2016)'},
+    {id:'exercise', label:'Moved body',           type:'bool',weight:12,color:'grn',
+     hint:'WHO: 150min/week moderate. Even 1 session = -26% depression risk (Mammen & Faulkner, 2013)'},
+    {id:'nosugar',  label:'Avoided sugar/cravings',type:'bool',weight:9,color:'grn',
+     hint:'WHO: free sugars <10% daily energy. Cravings managed by stable glucose, not willpower alone'},
+    {id:'noultra',  label:'No ultra-processed',   type:'bool',weight:8,color:'grn',
+     hint:'NOVA classification. Hall et al. (2019) RCT: ultra-processed +500kcal/day unintentionally. Linked to depression'},
+    {id:'noalcohol',label:'Alcohol-free day',      type:'bool',weight:11,color:'grn',
+     hint:'Any amount = risk. Suppresses REM sleep & impairs recovery. IARC Group 1 carcinogen'},
+    {id:'hygiene',  label:'Full hygiene routine',  type:'bool',weight:5,color:'acc',
+     hint:'Shower, teeth, grooming. Behavioral activation signal anchors self-identity (Martell et al., 2010)'},
+  ]},
+  {id:'mind',label:'MIND',habits:[
+    {id:'outside',  label:'Time outside',          type:'bool',weight:8,color:'grn',
+     hint:'Natural light anchors circadian rhythm. Nature walk reduces rumination vs urban walk (Bratman et al., 2015)'},
+    {id:'noporn',   label:'No pornography',         type:'bool',weight:10,color:'grn',
+     hint:'Habitual use -> reduced striatum volume (reward center). Dampens real-world motivation (Kuhn & Gallinat, 2014)'},
+    {id:'noyt',     label:'Avoided binge-YouTube',  type:'bool',weight:7,color:'acc',
+     hint:'Variable reward loops (autoplay) chronically lower focus baseline. 1h intentional > 3h passive (Newport, 2019)'},
+    {id:'reading',  label:'Read today (5+ pages)',  type:'bool',weight:6,color:'acc',
+     hint:'Even 5-10 pages/day compounds. Builds sustained focus tolerance & empathy (Mar et al., 2009)'},
+    {id:'creative', label:'Creative work',           type:'bool',weight:7,color:'acc',
+     hint:'Agency + mastery = intrinsic motivation. Making something = effort dopamine, not stimulus dopamine (Deci & Ryan, 2000)'},
+    {id:'social_q', label:'Social quality',          type:'sel',
+     opts:['none','brief (hi/bye)','meaningful (real talk)','deep (vulnerable)'],
+     weight:10,color:'acc',
+     hint:'Quality > quantity. Loneliness = 15 cig/day health risk. Deep > meaningful > brief > none (Holt-Lunstad, 2015)'},
+  ]},
 ];
 
-const ALL_HABS = HAB_GROUPS.flatMap(g=>g.habits);
+const ALL_HABS=HAB_GROUPS.flatMap(g=>g.habits);
 
 /* ══════════════════════════════════════════════════
    MEDIA DEFINITIONS
 ══════════════════════════════════════════════════ */
 const MEDIA_DEF={
   games:{
-    label:'Games',sing:'game',
-    yearDone:['Completed'],
+    label:'Games',sing:'game',yearDone:['Completed'],
     statuses:['Playing','Completed','Paused','Backlog'],
     fields:[
-      {id:'title',  label:'Title *',    type:'text',   req:true},
-      {id:'status', label:'Status',     type:'select', opts:['Playing','Completed','Paused','Backlog']},
-      {id:'rating', label:'Score /10',  type:'number', min:1, max:10},
-      {id:'progress',label:'Progress', type:'text',   ph:'e.g. 40h / Chapter 5'},
-      {id:'year',   label:'Year done',  type:'number', min:2020, max:2035},
-      {id:'notes',  label:'Notes',      type:'text'},
+      {id:'title',   label:'Title *',   type:'text',   req:true},
+      {id:'status',  label:'Status',    type:'select', opts:['Playing','Completed','Paused','Backlog']},
+      {id:'rating',  label:'Score /10', type:'number', min:1,max:10},
+      {id:'progress',label:'Progress',  type:'text',   ph:'e.g. 40h / Chapter 5'},
+      {id:'year',    label:'Year done', type:'number', min:2020,max:2035},
+      {id:'notes',   label:'Notes',     type:'text'},
     ]
   },
   screen:{
-    label:'Shows & Films',sing:'show/film',
-    yearDone:['Finished','Watched'],
+    label:'Shows & Films',sing:'show/film',yearDone:['Finished','Watched'],
     statuses:['Watching','Finished','Watched','Paused','Backlog'],
     fields:[
-      {id:'title',    label:'Title *',   type:'text',   req:true},
-      {id:'kind',     label:'Format',    type:'select', opts:['Series','Film','Documentary','Anime','Mini-series','Short']},
-      {id:'progress', label:'Progress',  type:'text',   ph:'e.g. S02E05'},
-      {id:'status',   label:'Status',    type:'select', opts:['Watching','Finished','Watched','Paused','Backlog']},
-      {id:'rating',   label:'Score /10', type:'number', min:1, max:10},
-      {id:'year',     label:'Year done', type:'number', min:2020, max:2035},
+      {id:'title',   label:'Title *',   type:'text',   req:true},
+      {id:'kind',    label:'Format',    type:'select', opts:['Series','Film','Documentary','Anime','Mini-series','Short']},
+      {id:'progress',label:'Progress',  type:'text',   ph:'e.g. S02E05'},
+      {id:'status',  label:'Status',    type:'select', opts:['Watching','Finished','Watched','Paused','Backlog']},
+      {id:'rating',  label:'Score /10', type:'number', min:1,max:10},
+      {id:'year',    label:'Year done', type:'number', min:2020,max:2035},
     ]
   },
   books:{
-    label:'Books',sing:'book',
-    yearDone:['Finished'],
+    label:'Books',sing:'book',yearDone:['Finished'],
     statuses:['Reading','Finished','Paused','Backlog'],
     fields:[
-      {id:'title',    label:'Title *',   type:'text',   req:true},
-      {id:'author',   label:'Author',    type:'text'},
-      {id:'progress', label:'Progress %',type:'number', min:0, max:100, ph:'0-100'},
-      {id:'status',   label:'Status',    type:'select', opts:['Reading','Finished','Paused','Backlog']},
-      {id:'rating',   label:'Score /10', type:'number', min:1, max:10},
-      {id:'year',     label:'Year done', type:'number', min:2020, max:2035},
+      {id:'title',   label:'Title *',   type:'text', req:true},
+      {id:'author',  label:'Author',    type:'text'},
+      {id:'progress',label:'Progress %',type:'number',min:0,max:100,ph:'0-100'},
+      {id:'status',  label:'Status',    type:'select',opts:['Reading','Finished','Paused','Backlog']},
+      {id:'rating',  label:'Score /10', type:'number',min:1,max:10},
+      {id:'year',    label:'Year done', type:'number',min:2020,max:2035},
     ]
   }
 };
@@ -868,7 +833,7 @@ async function callAI(provider,prompt){
     return d.choices?.[0]?.message?.content||'';
   }
   if(provider==='gemini'){
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${p.model}:generateContent?key=${key}`,{
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+p.model+':generateContent?key='+key,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
@@ -880,135 +845,113 @@ async function callAI(provider,prompt){
 }
 
 /* ══════════════════════════════════════════════════
-   SCORING ENGINE — Context-aware, science-grounded
-   
-   Sleep  (30pts): J-curve per NSF/Walker
-   State  (30pts): mood+energy+calm composite
-   Habits (40pts): weighted, context-adjusted per day type
-
-   Context adjustments:
-   - Free/weekend day: reading, social, creative weighted HIGHER (more time)
-   - Free/weekend day: YT avoidance weighted HIGHER (more temptation)  
-   - Workday: social/creative lower penalty (less free time)
-   - Sick day: exercise, social, creative all zeroed (not applicable)
-   - Travel day: exercise, hygiene adjusted
-   - Alcohol penalty: dose-dependent up to -35% of habit score
-
-   Grades: S(≥90%) A(≥78%) B(≥63%) C(≥48%) D(<48%)
+   SCORING ENGINE
+   Sleep (30pts) + Wellbeing (30pts) + Habits (40pts)
+   Context-adjusted per day type.
 ══════════════════════════════════════════════════ */
 function calcScore(data){
-  let pts=0,maxPts=0,bd={};
+  let pts=0,maxPts=0;
+  const bd={};
 
-  // 1. SLEEP (30pts)
+  // 1. SLEEP (30pts) — J-curve per Walker/NSF
   const slpMax=30;
   if(data.sleepH!=null){
     const h=parseFloat(data.sleepH)||0;
     let eff;
-    if(h>=7&&h<=9)           eff=1.00;
-    else if(h>=6.5&&h<7)     eff=0.84;
-    else if(h>9&&h<=9.5)     eff=0.87;
-    else if(h>=6&&h<6.5)     eff=0.66;
-    else if(h>9.5&&h<=10.5)  eff=0.72;
-    else if(h>=5&&h<6)       eff=0.44;
-    else if(h>10.5)           eff=0.55;
-    else                      eff=0.22;
-    const qb=(data.sleepQ!=null)?((data.sleepQ-5)/10)*0.14:0;
+    if(h>=7&&h<=9)          eff=1.00;
+    else if(h>=6.5&&h<7)    eff=0.84;
+    else if(h>9&&h<=9.5)    eff=0.87;
+    else if(h>=6&&h<6.5)    eff=0.66;
+    else if(h>9.5&&h<=10.5) eff=0.72;
+    else if(h>=5&&h<6)      eff=0.44;
+    else if(h>10.5)          eff=0.55;
+    else                     eff=0.22;
+    const qb=data.sleepQ!=null?((data.sleepQ-5)/10)*0.14:0;
     eff=Math.min(1,eff+qb);
     const p=Math.round(eff*slpMax);
-    pts+=p; bd.sleep={pts:p,max:slpMax};
+    pts+=p;bd.sleep={pts:p,max:slpMax};
   }
   maxPts+=slpMax;
 
-  // 2. WELLBEING (30pts)
+  // 2. WELLBEING (30pts) — calm weighted highest (anxiety = core dysregulator)
   const wMax=30;
   if(data.mood!=null||data.energy!=null||data.anxiety!=null){
-    const m=data.mood??5,e=data.energy??5,c=data.anxiety??5;
-    const w=(m*0.33+e*0.28+c*0.39);
+    const m=data.mood!=null?data.mood:5;
+    const e=data.energy!=null?data.energy:5;
+    const c=data.anxiety!=null?data.anxiety:5;
+    const w=m*0.33+e*0.28+c*0.39;
     const p=Math.round((w/10)*wMax);
-    pts+=p; bd.wellbeing={pts:p,max:wMax};
+    pts+=p;bd.wellbeing={pts:p,max:wMax};
   }
   maxPts+=wMax;
 
-  // 3. HABITS (40pts)
+  // 3. HABITS (40pts) — context-adjusted
   const habMax=40;
   let habPts=0,habTotal=0;
-  const dt=data.habits?.daytype||'workday';
+  const dt=data.habits&&data.habits.daytype?data.habits.daytype:'workday';
   const isFreeDay=dt==='free day'||dt==='half-free';
   const isSick=dt==='sick day';
   const isTravel=dt==='travel day';
   const habData=data.habits||{};
 
-  ALL_HABS.forEach(h=>{
+  ALL_HABS.forEach(function(h){
     if(h.weight===0)return;
     let w=h.weight;
-    
-    // Context: sick day — only hygiene and no-alcohol matter
-    if(isSick&&!['hygiene','noalcohol','noporn','nosugar'].includes(h.id)){w=Math.round(w*0.2);if(w<1)return}
-    // Context: travel — exercise less expected, reading/creative harder
-    if(isTravel&&['exercise','reading','creative'].includes(h.id))w=Math.round(w*0.5);
-    // Context: free day — more time = higher expectation for enrichment habits
-    if(isFreeDay&&['reading','creative','social_q'].includes(h.id))w=Math.round(w*1.3);
-    // Context: free day — YT avoidance harder on free days, more penalty if fail
+    if(isSick&&['exercise','reading','creative','outside','social_q'].indexOf(h.id)<0){
+      // on sick day only basic habits count, rest ignored
+    }
+    if(isSick&&['exercise','reading','creative','outside','social_q'].indexOf(h.id)>=0){w=Math.round(w*0.15);if(w<1)return}
+    if(isTravel&&['exercise','reading','creative'].indexOf(h.id)>=0)w=Math.round(w*0.5);
+    if(isFreeDay&&['reading','creative','social_q'].indexOf(h.id)>=0)w=Math.round(w*1.3);
     if(isFreeDay&&h.id==='noyt')w=Math.round(w*1.25);
-    // Context: workday — social/creative less expected (less time)
-    if(!isFreeDay&&dt==='workday'&&['social_q','creative'].includes(h.id))w=Math.round(w*0.75);
-
+    if(!isFreeDay&&dt==='workday'&&['social_q','creative'].indexOf(h.id)>=0)w=Math.round(w*0.75);
     habTotal+=w;
-
     if(h.type==='bool'){
       if(habData[h.id])habPts+=w;
-    } else if(h.type==='qty'){
+    }else if(h.type==='qty'){
       const v=parseInt(habData[h.id])||0;
-      if(h.id==='water'){
-        // Optimal 10 glasses (EFSA ~2.5L); partial credit
-        const ratio=Math.min(v/10,1);
-        habPts+=Math.round(ratio*w);
-      } else if(h.id==='meals'){
-        const mMap={0:0,1:.3,2:.7,3:1,4:1,5:1};
-        habPts+=Math.round((mMap[Math.min(v,5)]||0)*w);
+      if(h.id==='water'){habPts+=Math.round(Math.min(v/10,1)*w);}
+      else if(h.id==='meals'){
+        const mm={0:0,1:.3,2:.7,3:1,4:1,5:1};
+        habPts+=Math.round((mm[Math.min(v,5)]||0)*w);
       }
-    } else if(h.type==='sel'){
+    }else if(h.type==='sel'){
       if(h.id==='social_q'){
-        const v=habData[h.id]||'none';
-        const sMap={
+        const sv={
           'none':0,
           'brief (hi/bye)':.25,
           'meaningful (real talk)':.72,
           'deep (vulnerable)':1
         };
-        habPts+=Math.round((sMap[v]||0)*w);
+        habPts+=Math.round((sv[habData[h.id]]||0)*w);
       }
     }
   });
 
-  // Alcohol penalty — dose-dependent (Rehm et al., 2017)
+  // Alcohol penalty — dose-dependent
   const alc=parseInt(habData.alcohol_amt)||0;
-  if(alc>0){
-    const penalty=Math.min(alc*0.075,0.35)*habMax;
-    habPts=Math.max(0,habPts-Math.round(penalty));
-  }
+  if(alc>0){habPts=Math.max(0,habPts-Math.round(Math.min(alc*0.075,0.35)*habMax));}
 
   const habP=habTotal>0?Math.round((habPts/habTotal)*habMax):0;
-  pts+=habP; bd.habits={pts:habP,max:habMax};
+  pts+=habP;bd.habits={pts:habP,max:habMax};
   maxPts+=habMax;
 
   const pct=maxPts>0?pts/maxPts:0;
-  let grade;
+  let grade='D';
   if(pct>=.90)grade='S';
   else if(pct>=.78)grade='A';
   else if(pct>=.63)grade='B';
   else if(pct>=.48)grade='C';
-  else grade='D';
 
   return{pts,maxPts,pct,grade,bd};
 }
 
 const GRADE_DESC={
   S:'All systems aligned. Sleep, state and habits converged. Build on this.',
-  A:'Strong execution. One area of friction — still a very solid day.',
-  B:'Decent ground covered. A clear gap to address, but fundamentals held.',
+  A:'Strong execution. Minor friction somewhere — fundamentals are there.',
+  B:'Decent ground covered. One clear gap, nothing alarming.',
   C:'One anchor slipped. Acknowledge it, don\'t spiral. Tomorrow is open.',
-  D:'Rough day — logged honestly. Hard days are part of any long run.',
+  D:'Hard day — logged honestly. These happen in any long run.',
 };
 const GRADE_CLASS={S:'gs',A:'ga',B:'gb',C:'gc',D:'gd'};
 
@@ -1017,7 +960,7 @@ const GRADE_CLASS={S:'gs',A:'ga',B:'gb',C:'gc',D:'gd'};
 ══════════════════════════════════════════════════ */
 function getDay(d){return db.get('d:'+dk(d))}
 function saveDay(d,data){db.set('d:'+dk(d),data)}
-const DEF_DAY=()=>({mood:null,energy:null,anxiety:null,sleepH:null,sleepQ:null,wakeTime:'',habits:{},notes:''})
+function DEF_DAY(){return{mood:null,energy:null,anxiety:null,sleepH:null,sleepQ:null,wakeTime:'',habits:{},notes:''}}
 function getMedia(){return db.get('media')||{games:[],screen:[],books:[]}}
 function saveMedia(m){db.set('media',m)}
 
@@ -1028,15 +971,15 @@ let appView='today',curDate=today(),mediaTab='games';
 
 function nav(v){
   appView=v;
-  document.querySelectorAll('.nb,.bbn').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
-  document.querySelectorAll('.view').forEach(el=>el.classList.toggle('on',el.id==='v-'+v));
+  document.querySelectorAll('.nb,.bbn').forEach(function(b){b.classList.toggle('on',b.dataset.v===v)});
+  document.querySelectorAll('.view').forEach(function(el){el.classList.toggle('on',el.id==='v-'+v)});
   if(v==='today')renderToday();
   if(v==='week')renderWeek();
   if(v==='month')renderMonth();
   if(v==='media')renderMedia();
   if(v==='year')renderYear();
 }
-document.querySelectorAll('.nb,.bbn').forEach(b=>b.addEventListener('click',()=>nav(b.dataset.v)));
+document.querySelectorAll('.nb,.bbn').forEach(function(b){b.addEventListener('click',function(){nav(b.dataset.v)})});
 
 /* ══════════════════════════════════════════════════
    SLIDER HELPER
@@ -1048,223 +991,269 @@ function initSlider(id,field,data,onChange){
   let touched=data[field]!=null;
   if(touched){sl.value=data[field];vl.textContent=data[field];vl.classList.remove('muted')}
   else{sl.value=5;vl.textContent='—';vl.classList.add('muted')}
-  const activate=()=>{touched=true;vl.textContent=sl.value;vl.classList.remove('muted')};
+  function activate(){touched=true;vl.textContent=sl.value;vl.classList.remove('muted')}
   sl.addEventListener('mousedown',activate);
   sl.addEventListener('touchstart',activate,{passive:true});
-  sl.addEventListener('input',()=>{if(touched){vl.textContent=sl.value}if(onChange)onChange()});
+  sl.addEventListener('input',function(){if(touched)vl.textContent=sl.value;if(onChange)onChange()});
 }
 
 /* ══════════════════════════════════════════════════
    AUTOSAVE
 ══════════════════════════════════════════════════ */
 let _saveTimer;
-function triggerSave(){clearTimeout(_saveTimer);_saveTimer=setTimeout(()=>{if(appView==='today')doSave(false)},800)}
+function triggerSave(){clearTimeout(_saveTimer);_saveTimer=setTimeout(function(){if(appView==='today')doSave(false)},800)}
 
 function collectDay(){
   const el=document.getElementById('v-today');
   if(!el)return DEF_DAY();
-  const mv=id=>{const v=document.getElementById('vl-'+id)?.textContent;return(v&&v!=='—')?parseInt(v):null};
+  function mv(id){const v=document.getElementById('vl-'+id);return(v&&v.textContent&&v.textContent!=='—')?parseInt(v.textContent):null}
   const habits={};
-  el.querySelectorAll('.ht[data-hid]').forEach(b=>{habits[b.dataset.hid]=b.classList.contains('on')||b.classList.contains('on-grn')||b.classList.contains('on-red')});
-  el.querySelectorAll('.ht-qty[data-hid]').forEach(wrap=>{habits[wrap.dataset.hid]=parseInt(wrap.querySelector('.ht-qty-val').textContent)||0});
-  el.querySelectorAll('.ht-sel[data-hid]').forEach(wrap=>{habits[wrap.dataset.hid]=wrap.querySelector('select').value||'none'});
+  el.querySelectorAll('.ht[data-hid]').forEach(function(b){habits[b.dataset.hid]=b.classList.contains('on')||b.classList.contains('on-grn')||b.classList.contains('on-red')});
+  el.querySelectorAll('.ht-qty[data-hid]').forEach(function(wrap){habits[wrap.dataset.hid]=parseInt(wrap.querySelector('.ht-qty-val').textContent)||0});
+  el.querySelectorAll('.ht-sel[data-hid]').forEach(function(wrap){habits[wrap.dataset.hid]=wrap.querySelector('select').value||'none'});
+  const sleephEl=document.getElementById('inp-sleeph');
+  const wakeEl=document.getElementById('inp-wake');
+  const notesEl=document.getElementById('inp-notes');
   return{
     mood:mv('mood'),energy:mv('energy'),anxiety:mv('anxiety'),
-    sleepH:parseFloat(document.getElementById('inp-sleeph')?.value)||null,
+    sleepH:sleephEl?parseFloat(sleephEl.value)||null:null,
     sleepQ:mv('sleepq'),
-    wakeTime:document.getElementById('inp-wake')?.value||'',
-    habits,
-    notes:document.getElementById('inp-notes')?.value||''
+    wakeTime:wakeEl?wakeEl.value:'',
+    habits:habits,
+    notes:notesEl?notesEl.value:''
   };
 }
 
-function doSave(badge=true){
+function doSave(badge){
+  if(badge===undefined)badge=true;
   saveDay(curDate,collectDay());
   refreshScore();
   if(badge){
     const m=document.getElementById('save-ok');
-    if(m){m.classList.add('show');setTimeout(()=>m.classList.remove('show'),1600)}
+    if(m){m.classList.add('show');setTimeout(function(){m.classList.remove('show')},1600)}
   }
 }
 
 /* ══════════════════════════════════════════════════
-   SCORE WIDGET (live)
+   SCORE WIDGET — HTML via string concat, no nesting
 ══════════════════════════════════════════════════ */
 function refreshScore(){
   const el=document.getElementById('score-widget');
   if(!el)return;
   const d=collectDay();
-  const hasData=d.mood!=null||d.sleepH!=null||Object.values(d.habits).some(v=>v&&v!==0&&v!=='none');
+  const habVals=Object.values(d.habits);
+  const hasData=d.mood!=null||d.sleepH!=null||habVals.some(function(v){return v&&v!==0&&v!=='none'});
   if(!hasData){
-    el.innerHTML=`<div class="score-empty">// Fill in any field — score updates live</div>`;
+    el.innerHTML='<div class="score-empty">// Fill in any field — score updates live</div>';
     return;
   }
   const s=calcScore(d);
-  const{bd}=s;
-  el.innerHTML=`
-  <div class="score-wrap">
-    <div class="score-grade-col">
-      <div class="score-grade ${GRADE_CLASS[s.grade]}">${s.grade}</div>
-      <div class="score-pts">${s.pts}/${s.maxPts}</div>
-    </div>
-    <div class="score-right">
-      <div class="score-desc">${GRADE_DESC[s.grade]}</div>
-      <div class="score-bars">
-        ${bd.wellbeing?`<div class="sbar-row"><span class="sbar-lbl">wellbeing</span><div class="sbar-track"><div class="sbar-fill f-well" style="width:${(bd.wellbeing.pts/bd.wellbeing.max*100).toFixed(0)}%"></div></div><span class="sbar-val">${bd.wellbeing.pts}/${bd.wellbeing.max}</span></div>`:''}
-        ${bd.sleep?`<div class="sbar-row"><span class="sbar-lbl">sleep</span><div class="sbar-track"><div class="sbar-fill f-slp" style="width:${(bd.sleep.pts/bd.sleep.max*100).toFixed(0)}%"></div></div><span class="sbar-val">${bd.sleep.pts}/${bd.sleep.max}</span></div>`:''}
-        ${bd.habits?`<div class="sbar-row"><span class="sbar-lbl">habits</span><div class="sbar-track"><div class="sbar-fill f-hab" style="width:${(bd.habits.pts/bd.habits.max*100).toFixed(0)}%"></div></div><span class="sbar-val">${bd.habits.pts}/${bd.habits.max}</span></div>`:''}
-      </div>
-    </div>
-  </div>`;
+  const bd=s.bd;
+
+  let bars='';
+  if(bd.wellbeing){
+    const pct=Math.round(bd.wellbeing.pts/bd.wellbeing.max*100);
+    bars+='<div class="sbar-row"><span class="sbar-lbl">wellbeing</span><div class="sbar-track"><div class="sbar-fill f-well" style="width:'+pct+'%"></div></div><span class="sbar-val">'+bd.wellbeing.pts+'/'+bd.wellbeing.max+'</span></div>';
+  }
+  if(bd.sleep){
+    const pct=Math.round(bd.sleep.pts/bd.sleep.max*100);
+    bars+='<div class="sbar-row"><span class="sbar-lbl">sleep</span><div class="sbar-track"><div class="sbar-fill f-slp" style="width:'+pct+'%"></div></div><span class="sbar-val">'+bd.sleep.pts+'/'+bd.sleep.max+'</span></div>';
+  }
+  if(bd.habits){
+    const pct=Math.round(bd.habits.pts/bd.habits.max*100);
+    bars+='<div class="sbar-row"><span class="sbar-lbl">habits</span><div class="sbar-track"><div class="sbar-fill f-hab" style="width:'+pct+'%"></div></div><span class="sbar-val">'+bd.habits.pts+'/'+bd.habits.max+'</span></div>';
+  }
+
+  el.innerHTML='<div class="score-wrap">'
+    +'<div class="score-grade-col">'
+    +'<div class="score-grade '+GRADE_CLASS[s.grade]+'">'+s.grade+'</div>'
+    +'<div class="score-pts">'+s.pts+'/'+s.maxPts+'</div>'
+    +'</div>'
+    +'<div class="score-right">'
+    +'<div class="score-desc">'+GRADE_DESC[s.grade]+'</div>'
+    +'<div class="score-bars">'+bars+'</div>'
+    +'</div></div>';
+}
+
+/* ══════════════════════════════════════════════════
+   HABIT INPUT RENDERERS — string concat, no nesting
+══════════════════════════════════════════════════ */
+function ckSVG(){
+  return '<svg width="6" height="5" viewBox="0 0 6 5" fill="none"><polyline points=".8,2.5 2.3,4.2 5.2,.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+function ckSVGbg(){
+  return '<svg width="6" height="5" viewBox="0 0 6 5" fill="none"><polyline points=".8,2.5 2.3,4.2 5.2,.8" stroke="var(--bg)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function renderHabitInput(h,habData){
+  if(!h)return'';
+  if(h.type==='bool'){
+    const isOn=!!habData[h.id];
+    const cls=isOn?' on-grn':'';
+    return '<button class="ht'+cls+'" data-hid="'+h.id+'" title="'+h.hint+'">'
+      +'<div class="ht-box"><span class="ht-ck">'+ckSVG()+'</span></div>'
+      +h.label+'</button>';
+  }
+  if(h.type==='qty'){
+    const val=parseInt(habData[h.id])||0;
+    const colorCls=h.color==='blu'?' blu':h.color==='red'?' red':'';
+    const hasCls=val>0?' has-val':'';
+    let waterBar='';
+    if(h.id==='water'){
+      const pct=Math.min(Math.round(val/10*100),100);
+      waterBar='<div class="water-bar" style="width:'+pct+'%"></div>';
+    }
+    return '<div class="ht-qty'+hasCls+colorCls+'" data-hid="'+h.id+'" title="'+h.hint+'" style="position:relative">'
+      +'<div class="ht-qty-label"><div class="ht-box" style="pointer-events:none"></div>'+h.label+'</div>'
+      +'<div class="ht-qty-controls">'
+      +'<button class="ht-qty-btn qty-dec">−</button>'
+      +'<div class="ht-qty-val">'+val+'</div>'
+      +'<button class="ht-qty-btn qty-inc">+</button>'
+      +'</div>'+waterBar+'</div>';
+  }
+  if(h.type==='sel'){
+    const val=habData[h.id]||'';
+    const hasVal=val&&val!=='none'&&val!=='';
+    const hasCls=hasVal?' has-val':'';
+    let boxInner='';
+    if(hasVal)boxInner='<span style="background:currentColor;border-color:currentColor;display:inline-flex;align-items:center;justify-content:center;width:9px;height:9px;">'+ckSVGbg()+'</span>';
+    let opts='<option value="">—</option>';
+    h.opts.forEach(function(o){
+      opts+='<option value="'+o+'"'+(val===o?' selected':'')+'>'+o+'</option>';
+    });
+    return '<div class="ht-sel'+hasCls+'" data-hid="'+h.id+'" title="'+h.hint+'">'
+      +'<div class="ht-sel-label"><div class="ht-box" style="pointer-events:none">'+boxInner+'</div>'+h.label+'</div>'
+      +'<select>'+opts+'</select>'
+      +'</div>';
+  }
+  return'';
 }
 
 /* ══════════════════════════════════════════════════
    RENDER TODAY
-   Sections: Context → State → Sleep → Body → Mind → Notes
 ══════════════════════════════════════════════════ */
 function renderToday(){
   const el=document.getElementById('v-today');
   const d=getDay(curDate)||DEF_DAY();
   const isTod=isToday(curDate);
   const isWE=isWeekend(curDate);
-  const dt=d.habits?.daytype||'';
+  const dt=d.habits&&d.habits.daytype?d.habits.daytype:'';
   const isFree=isWE||(dt==='free day')||(dt==='half-free');
+  const badgeCls=isFree?'freeday':'workday';
+  const badgeTxt=isFree?'FREE':'WORK';
+  const titleTxt=isTod?'TODAY':fmtFull(curDate).toUpperCase();
 
-  el.innerHTML=`
-<div class="ph">
-  <div class="ph-left">
-    <div class="ph-title">${isTod?'TODAY':fmtFull(curDate).toUpperCase()}<span class="dt-badge ${isFree?'freeday':'workday'}">${isFree?'FREE':'WORK'}</span></div>
-    <div class="ph-sub">${fmtFull(curDate)}</div>
-  </div>
-  <div class="dn">
-    <button class="dn-btn" id="btn-prev">←</button>
-    ${!isTod?`<button class="dn-now" id="btn-now">NOW</button>`:''}
-    <button class="dn-btn" id="btn-next"${isTod?' disabled':''}>→</button>
-  </div>
-</div>
+  // Build nav buttons
+  let dnBtns='<button class="dn-btn" id="btn-prev">←</button>';
+  if(!isTod)dnBtns+='<button class="dn-now" id="btn-now">NOW</button>';
+  const nextDisabled=isTod?' disabled':'';
+  dnBtns+='<button class="dn-btn" id="btn-next"'+nextDisabled+'>→</button>';
 
-<div id="score-widget" style="margin-bottom:1.2rem"></div>
+  // Build context habits
+  const ctxG=HAB_GROUPS.find(function(g){return g.id==='context'});
+  let ctxHtml='';
+  ctxG.habits.forEach(function(h){ctxHtml+=renderHabitInput(h,d.habits)});
 
-<!-- CONTEXT SECTION -->
-<div class="sec">
-  <div class="sec-hd"><span class="sec-label">Context</span><span class="sec-count">Day type · Drinks</span></div>
-  <div class="hab-section-body" style="padding:0">
-    <div style="display:flex;flex-wrap:wrap;gap:4px">
-      ${renderHabitInput(ALL_HABS.find(h=>h.id==='daytype'),d.habits)}
-      ${renderHabitInput(ALL_HABS.find(h=>h.id==='alcohol_amt'),d.habits)}
-    </div>
-  </div>
-</div>
+  // Build body habits
+  const bodyG=HAB_GROUPS.find(function(g){return g.id==='body'});
+  let bodyHtml='';
+  bodyG.habits.forEach(function(h){bodyHtml+=renderHabitInput(h,d.habits)});
 
-<!-- STATE SECTION -->
-<div class="sec">
-  <div class="sec-hd"><span class="sec-label">State</span><span class="sec-count">Mood · Energy · Calm</span></div>
-  <div style="display:flex;flex-direction:column;gap:9px">
-    <div class="sl-row">
-      <div class="sl-meta"><div class="sl-name">Mood</div><div class="sl-hint">overall emotional tone</div></div>
-      <div class="sl-wrap"><input type="range" min="1" max="10" id="sl-mood"><div class="sl-val muted" id="vl-mood">—</div></div>
-    </div>
-    <div class="sl-row">
-      <div class="sl-meta"><div class="sl-name">Energy</div><div class="sl-hint">physical + mental</div></div>
-      <div class="sl-wrap"><input type="range" min="1" max="10" id="sl-energy"><div class="sl-val muted" id="vl-energy">—</div></div>
-    </div>
-    <div class="sl-row">
-      <div class="sl-meta"><div class="sl-name">Calm</div><div class="sl-hint">10 = fully at ease</div></div>
-      <div class="sl-wrap"><input type="range" min="1" max="10" id="sl-anxiety"><div class="sl-val muted" id="vl-anxiety">—</div></div>
-    </div>
-  </div>
-</div>
+  // Build mind habits
+  const mindG=HAB_GROUPS.find(function(g){return g.id==='mind'});
+  let mindHtml='';
+  mindG.habits.forEach(function(h){mindHtml+=renderHabitInput(h,d.habits)});
 
-<!-- SLEEP SECTION -->
-<div class="sec">
-  <div class="sec-hd"><span class="sec-label">Sleep</span><span class="sec-count">Optimal 7–9h</span></div>
-  <div style="display:flex;flex-direction:column;gap:9px">
-    <div class="sl-row">
-      <div class="sl-meta"><div class="sl-name">Wake time</div><div class="sl-hint">circadian anchor</div></div>
-      <input type="time" class="inp inp-t" id="inp-wake" value="${d.wakeTime||''}">
-    </div>
-    <div class="sl-row">
-      <div class="sl-meta"><div class="sl-name">Hours slept</div><div class="sl-hint"><7h or >9h = penalty</div></div>
-      <input type="number" class="inp inp-n" id="inp-sleeph" min="0" max="14" step="0.5" placeholder="7.5" value="${d.sleepH||''}">
-    </div>
-    <div class="sl-row">
-      <div class="sl-meta"><div class="sl-name">Sleep quality</div><div class="sl-hint">how rested?</div></div>
-      <div class="sl-wrap"><input type="range" min="1" max="10" id="sl-sleepq"><div class="sl-val muted" id="vl-sleepq">—</div></div>
-    </div>
-  </div>
-</div>
+  // Build AI provider options
+  let aiOpts='';
+  const lastAI=db.get('last_ai')||'anthropic';
+  Object.keys(AI).forEach(function(k){
+    const sel=(lastAI===k)?' selected':'';
+    aiOpts+='<option value="'+k+'"'+sel+'>'+AI[k].label+'</option>';
+  });
 
-<!-- BODY HABITS -->
-<div class="sec">
-  <div class="sec-hd"><span class="sec-label">Body</span><span class="sec-count">Hydration · Fuel · Movement</span></div>
-  <div style="display:flex;flex-wrap:wrap;gap:4px">
-    ${HAB_GROUPS.find(g=>g.id==='body').habits.map(h=>renderHabitInput(h,d.habits)).join('')}
-  </div>
-</div>
+  el.innerHTML=
+    '<div class="ph">'
+    +'<div class="ph-left">'
+    +'<div class="ph-title">'+titleTxt+'<span class="dt-badge '+badgeCls+'">'+badgeTxt+'</span></div>'
+    +'<div class="ph-sub">'+fmtFull(curDate)+'</div>'
+    +'</div>'
+    +'<div class="dn">'+dnBtns+'</div>'
+    +'</div>'
 
-<!-- MIND HABITS -->
-<div class="sec">
-  <div class="sec-hd"><span class="sec-label">Mind</span><span class="sec-count">Dopamine · Focus · Connection</span></div>
-  <div style="display:flex;flex-wrap:wrap;gap:4px">
-    ${HAB_GROUPS.find(g=>g.id==='mind').habits.map(h=>renderHabitInput(h,d.habits)).join('')}
-  </div>
-</div>
+    +'<div id="score-widget" style="margin-bottom:1.2rem"></div>'
 
-<!-- NOTES -->
-<div class="sec">
-  <div class="sec-hd"><span class="sec-label">Notes</span></div>
-  <textarea class="nt" id="inp-notes" placeholder="// brief log — what happened, what shifted...">${d.notes||''}</textarea>
-</div>
+    +'<div class="sec"><div class="sec-hd"><span class="sec-label">Context</span><span class="sec-count">Day type · Drinks</span></div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:4px">'+ctxHtml+'</div></div>'
 
-<div class="save-row">
-  <div class="save-ok" id="save-ok">// SAVED</div>
-  <div class="ai-row">
-    <select class="ai-sel" id="ai-prov">
-      ${Object.entries(AI).map(([k,v])=>`<option value="${k}" ${(db.get('last_ai')||'anthropic')===k?'selected':''}>${v.label}</option>`).join('')}
-    </select>
-    <button class="btn-s" id="btn-ai">ANALYSE</button>
-  </div>
-  <button class="btn-p" id="btn-save">SAVE</button>
-</div>
+    +'<div class="sec"><div class="sec-hd"><span class="sec-label">State</span><span class="sec-count">Mood · Energy · Calm</span></div>'
+    +'<div style="display:flex;flex-direction:column;gap:9px">'
+    +'<div class="sl-row"><div class="sl-meta"><div class="sl-name">Mood</div><div class="sl-hint">overall emotional tone</div></div><div class="sl-wrap"><input type="range" min="1" max="10" id="sl-mood"><div class="sl-val muted" id="vl-mood">—</div></div></div>'
+    +'<div class="sl-row"><div class="sl-meta"><div class="sl-name">Energy</div><div class="sl-hint">physical + mental</div></div><div class="sl-wrap"><input type="range" min="1" max="10" id="sl-energy"><div class="sl-val muted" id="vl-energy">—</div></div></div>'
+    +'<div class="sl-row"><div class="sl-meta"><div class="sl-name">Calm</div><div class="sl-hint">10 = fully at ease</div></div><div class="sl-wrap"><input type="range" min="1" max="10" id="sl-anxiety"><div class="sl-val muted" id="vl-anxiety">—</div></div></div>'
+    +'</div></div>'
 
-<div id="ai-result" style="display:none" class="ai-box">
-  <div class="ai-box-tag">AI ANALYSIS</div>
-  <div id="ai-text"></div>
-</div>`;
+    +'<div class="sec"><div class="sec-hd"><span class="sec-label">Sleep</span><span class="sec-count">Optimal 7-9h</span></div>'
+    +'<div style="display:flex;flex-direction:column;gap:9px">'
+    +'<div class="sl-row"><div class="sl-meta"><div class="sl-name">Wake time</div><div class="sl-hint">circadian anchor</div></div><input type="time" class="inp inp-t" id="inp-wake" value="'+(d.wakeTime||'')+'"></div>'
+    +'<div class="sl-row"><div class="sl-meta"><div class="sl-name">Hours slept</div><div class="sl-hint">&lt;7h or &gt;9h = penalty</div></div><input type="number" class="inp inp-n" id="inp-sleeph" min="0" max="14" step="0.5" placeholder="7.5" value="'+(d.sleepH||'')+'"></div>'
+    +'<div class="sl-row"><div class="sl-meta"><div class="sl-name">Sleep quality</div><div class="sl-hint">how rested?</div></div><div class="sl-wrap"><input type="range" min="1" max="10" id="sl-sleepq"><div class="sl-val muted" id="vl-sleepq">—</div></div></div>'
+    +'</div></div>'
+
+    +'<div class="sec"><div class="sec-hd"><span class="sec-label">Body</span><span class="sec-count">Hydration · Fuel · Movement</span></div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:4px">'+bodyHtml+'</div></div>'
+
+    +'<div class="sec"><div class="sec-hd"><span class="sec-label">Mind</span><span class="sec-count">Dopamine · Focus · Connection</span></div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:4px">'+mindHtml+'</div></div>'
+
+    +'<div class="sec"><div class="sec-hd"><span class="sec-label">Notes</span></div>'
+    +'<textarea class="nt" id="inp-notes" placeholder="// brief log...">'+(d.notes||'')+'</textarea></div>'
+
+    +'<div class="save-row">'
+    +'<div class="save-ok" id="save-ok">// SAVED</div>'
+    +'<div class="ai-row">'
+    +'<select class="ai-sel" id="ai-prov">'+aiOpts+'</select>'
+    +'<button class="btn-s" id="btn-ai">ANALYSE</button>'
+    +'</div>'
+    +'<button class="btn-p" id="btn-save">SAVE</button>'
+    +'</div>'
+    +'<div id="ai-result" style="display:none" class="ai-box">'
+    +'<div class="ai-box-tag">AI ANALYSIS</div>'
+    +'<div id="ai-text"></div>'
+    +'</div>';
 
   // Init sliders
-  initSlider('mood','mood',d,()=>{triggerSave();refreshScore()});
-  initSlider('energy','energy',d,()=>{triggerSave();refreshScore()});
-  initSlider('anxiety','anxiety',d,()=>{triggerSave();refreshScore()});
-  initSlider('sleepq','sleepQ',d,()=>{triggerSave();refreshScore()});
+  initSlider('mood','mood',d,function(){triggerSave();refreshScore()});
+  initSlider('energy','energy',d,function(){triggerSave();refreshScore()});
+  initSlider('anxiety','anxiety',d,function(){triggerSave();refreshScore()});
+  initSlider('sleepq','sleepQ',d,function(){triggerSave();refreshScore()});
 
   // Qty controls
-  el.querySelectorAll('.ht-qty[data-hid]').forEach(wrap=>{
+  el.querySelectorAll('.ht-qty[data-hid]').forEach(function(wrap){
     const hid=wrap.dataset.hid;
     const vEl=wrap.querySelector('.ht-qty-val');
     const dec=wrap.querySelector('.qty-dec');
     const inc=wrap.querySelector('.qty-inc');
-    const hab=ALL_HABS.find(x=>x.id===hid);
+    const hab=ALL_HABS.find(function(x){return x.id===hid});
     let val=parseInt(d.habits[hid])||0;
     function upd(v){
-      val=Math.max(0,Math.min(hab?.max||12,v));
+      val=Math.max(0,Math.min(hab?hab.max:12,v));
       vEl.textContent=val;
       wrap.classList.toggle('has-val',val>0);
-      // Water: update bar
       if(hid==='water'){
         const bar=wrap.querySelector('.water-bar');
-        if(bar)bar.style.width=Math.min(val/10*100,100)+'%';
+        if(bar)bar.style.width=Math.min(Math.round(val/10*100),100)+'%';
       }
       triggerSave();refreshScore();
     }
-    dec.addEventListener('click',()=>upd(val-1));
-    inc.addEventListener('click',()=>upd(val+1));
+    dec.addEventListener('click',function(){upd(val-1)});
+    inc.addEventListener('click',function(){upd(val+1)});
     upd(val);
   });
 
   // Bool habits
-  el.querySelectorAll('.ht[data-hid]').forEach(b=>{
-    b.addEventListener('click',()=>{
+  el.querySelectorAll('.ht[data-hid]').forEach(function(b){
+    b.addEventListener('click',function(){
       const on=b.classList.contains('on')||b.classList.contains('on-grn')||b.classList.contains('on-red');
       b.classList.remove('on','on-grn','on-red');
       if(!on)b.classList.add('on-grn');
@@ -1274,7 +1263,7 @@ function renderToday(){
   });
 
   // Sel habits
-  el.querySelectorAll('.ht-sel[data-hid]').forEach(wrap=>{
+  el.querySelectorAll('.ht-sel[data-hid]').forEach(function(wrap){
     const hid=wrap.dataset.hid;
     const sel=wrap.querySelector('select');
     sel.value=d.habits[hid]||'';
@@ -1282,129 +1271,78 @@ function renderToday(){
       const v=sel.value;
       const hasVal=v&&v!=='none'&&v!=='';
       wrap.classList.toggle('has-val',hasVal);
-      // Social quality classes
       if(hid==='social_q'){
         wrap.classList.remove('soc-none','soc-brief','soc-meaningful','soc-deep');
-        if(v.includes('brief'))wrap.classList.add('soc-brief');
-        else if(v.includes('meaningful'))wrap.classList.add('soc-meaningful');
-        else if(v.includes('deep'))wrap.classList.add('soc-deep');
+        if(v.indexOf('brief')>=0)wrap.classList.add('soc-brief');
+        else if(v.indexOf('meaningful')>=0)wrap.classList.add('soc-meaningful');
+        else if(v.indexOf('deep')>=0)wrap.classList.add('soc-deep');
         else wrap.classList.add('soc-none');
       }
     }
-    sel.addEventListener('change',()=>{updateSel();triggerSave();refreshScore()});
+    sel.addEventListener('change',function(){updateSel();triggerSave();refreshScore()});
     updateSel();
   });
 
-  el.querySelector('#inp-wake').addEventListener('change',triggerSave);
-  el.querySelector('#inp-sleeph').addEventListener('input',()=>{triggerSave();refreshScore()});
-  el.querySelector('#inp-notes').addEventListener('blur',triggerSave);
-  el.querySelector('#btn-save').onclick=()=>doSave(true);
-  el.querySelector('#btn-prev').onclick=()=>{curDate=addD(curDate,-1);renderToday()};
-  const nb=el.querySelector('#btn-next');if(nb)nb.onclick=()=>{curDate=addD(curDate,1);renderToday()};
-  const tb=el.querySelector('#btn-now');if(tb)tb.onclick=()=>{curDate=today();renderToday()};
+  const wakeEl=el.querySelector('#inp-wake');
+  const sleephEl=el.querySelector('#inp-sleeph');
+  const notesEl=el.querySelector('#inp-notes');
+  if(wakeEl)wakeEl.addEventListener('change',triggerSave);
+  if(sleephEl)sleephEl.addEventListener('input',function(){triggerSave();refreshScore()});
+  if(notesEl)notesEl.addEventListener('blur',triggerSave);
+  el.querySelector('#btn-save').onclick=function(){doSave(true)};
+  el.querySelector('#btn-prev').onclick=function(){curDate=addD(curDate,-1);renderToday()};
+  const nxBtn=el.querySelector('#btn-next');if(nxBtn)nxBtn.onclick=function(){curDate=addD(curDate,1);renderToday()};
+  const nowBtn=el.querySelector('#btn-now');if(nowBtn)nowBtn.onclick=function(){curDate=today();renderToday()};
   el.querySelector('#btn-ai').onclick=analyzeDay;
 
   refreshScore();
 }
 
 /* ══════════════════════════════════════════════════
-   HABIT INPUT RENDERERS
-══════════════════════════════════════════════════ */
-function renderHabitInput(h,habData){
-  if(!h)return'';
-  if(h.type==='bool'){
-    const isOn=habData[h.id];
-    return`<button class="ht${isOn?' on-grn':''}" data-hid="${h.id}" title="${h.hint}">
-      <div class="ht-box"><svg class="ht-ck" width="6" height="5" viewBox="0 0 6 5" fill="none"><polyline points=".8,2.5 2.3,4.2 5.2,.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      ${h.label}
-    </button>`;
-  }
-  if(h.type==='qty'){
-    const val=parseInt(habData[h.id])||0;
-    const colorClass=h.color==='blu'?'blu':h.color==='red'?'red':'';
-    const waterBar=h.id==='water'?`<div class="water-bar" style="width:${Math.min(val/10*100,100)}%"></div>`:'';
-    return`<div class="ht-qty${val>0?' has-val':''} ${colorClass}" data-hid="${h.id}" title="${h.hint}" style="position:relative">
-      <div class="ht-qty-label">
-        <div class="ht-box" style="pointer-events:none"></div>${h.label}
-      </div>
-      <div class="ht-qty-controls">
-        <button class="ht-qty-btn qty-dec">−</button>
-        <div class="ht-qty-val">${val}</div>
-        <button class="ht-qty-btn qty-inc">+</button>
-      </div>
-      ${waterBar}
-    </div>`;
-  }
-  if(h.type==='sel'){
-    const val=habData[h.id]||'';
-    const hasVal=val&&val!=='none'&&val!=='';
-    return`<div class="ht-sel${hasVal?' has-val':''}" data-hid="${h.id}" title="${h.hint}">
-      <div class="ht-sel-label">
-        <div class="ht-box" style="pointer-events:none${hasVal?';background:currentColor;border-color:currentColor':''}">
-          ${hasVal?`<svg width="6" height="5" viewBox="0 0 6 5" fill="none"><polyline points=".8,2.5 2.3,4.2 5.2,.8" stroke="var(--bg)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}
-        </div>
-        ${h.label}
-      </div>
-      <select>
-        <option value="">—</option>
-        ${h.opts.map(o=>`<option value="${o}"${val===o?' selected':''}>${o}</option>`).join('')}
-      </select>
-    </div>`;
-  }
-  return'';
-}
-
-/* ══════════════════════════════════════════════════
    AI ANALYSIS
 ══════════════════════════════════════════════════ */
 async function analyzeDay(){
-  const prov=document.getElementById('ai-prov')?.value||'anthropic';
+  const provEl=document.getElementById('ai-prov');
+  const prov=provEl?provEl.value:'anthropic';
   db.set('last_ai',prov);
   const p=AI[prov];
-  if(!db.get(p.key)){openConfig(`Add your ${p.label} API key to enable AI analysis.`);return}
+  if(!db.get(p.key)){openConfig('Add your '+p.label+' API key to enable AI analysis.');return}
   doSave(false);
   const d=collectDay();
   const result=document.getElementById('ai-result');
   const textEl=document.getElementById('ai-text');
   result.style.display='block';
-  textEl.innerHTML=`<p style="font-family:var(--mono);font-size:9.5px;color:var(--t3);font-style:normal;letter-spacing:.08em">// TRANSMITTING...</p>`;
+  textEl.innerHTML='<p style="font-family:var(--mono);font-size:9.5px;color:var(--t3);font-style:normal;letter-spacing:.08em">// TRANSMITTING...</p>';
   document.getElementById('btn-ai').disabled=true;
   const sc=calcScore(d);
-  const dt=d.habits?.daytype||'workday';
+  const dt=d.habits&&d.habits.daytype?d.habits.daytype:'workday';
 
-  const habLines=ALL_HABS.filter(h=>h.weight>0).map(h=>{
+  let habLines='';
+  ALL_HABS.filter(function(h){return h.weight>0}).forEach(function(h){
     const v=d.habits[h.id];
-    if(h.type==='bool')return`${v?'[✓]':'[ ]'} ${h.label}`;
-    if(h.type==='qty')return`[${v||0}${h.unit?' '+h.unit:''}] ${h.label}`;
-    if(h.type==='sel')return`[${v||'—'}] ${h.label}`;
-    return'';
-  }).join('\n');
+    if(h.type==='bool')habLines+=(v?'[✓]':'[ ]')+' '+h.label+'\n';
+    else if(h.type==='qty')habLines+='['+(v||0)+(h.unit?' '+h.unit:'')+'] '+h.label+'\n';
+    else if(h.type==='sel')habLines+='['+(v||'—')+'] '+h.label+'\n';
+  });
 
-  const prompt=`You are a direct, science-aware, warm daily log analyst. Think of yourself as a knowledgeable friend who reads these logs — not a therapist, not a cheerleader.
-
-Date: ${fmtFull(curDate)} (${isWeekend(curDate)?'weekend':'weekday'}, day type: ${dt})
-Score: ${sc.grade} — ${sc.pts}/${sc.maxPts}
-Mood: ${d.mood??'—'}/10 · Energy: ${d.energy??'—'}/10 · Calm: ${d.anxiety??'—'}/10
-Wake: ${d.wakeTime||'—'} · Sleep: ${d.sleepH??'—'}h · Sleep quality: ${d.sleepQ??'—'}/10
-Habits:
-${habLines}
-Drinks today: ${d.habits?.alcohol_amt||0}
-Notes: "${d.notes||'(none)'}"
-
-Rules:
-- Connect dots when real (e.g. poor sleep → low energy → worse habits)
-- Account for day type — a workday with zero social is normal; a free day with zero social is worth noting
-- If they did something small (just 5 pages, brief hydration) acknowledge the minimum-viable win
-- If alcohol was consumed, be neutral but note the sleep/recovery consequence
-- One concrete, tiny action for tomorrow — not generic advice
-- Write 2–3 short paragraphs. No bullet lists. No emoji. Max 180 words.`;
+  const prompt='You are a direct, science-aware daily log analyst. Like a knowledgeable friend — not a therapist.\n\n'
+    +'Date: '+fmtFull(curDate)+' ('+(isWeekend(curDate)?'weekend':'weekday')+', '+dt+')\n'
+    +'Score: '+sc.grade+' — '+sc.pts+'/'+sc.maxPts+'\n'
+    +'Mood: '+(d.mood!=null?d.mood:'—')+'/10 · Energy: '+(d.energy!=null?d.energy:'—')+'/10 · Calm: '+(d.anxiety!=null?d.anxiety:'—')+'/10\n'
+    +'Wake: '+(d.wakeTime||'—')+' · Sleep: '+(d.sleepH!=null?d.sleepH:'—')+'h · Sleep quality: '+(d.sleepQ!=null?d.sleepQ:'—')+'/10\n'
+    +'Drinks today: '+(d.habits.alcohol_amt||0)+'\n'
+    +'Habits:\n'+habLines
+    +'Notes: "'+(d.notes||'(none)')+'"\n\n'
+    +'Rules: connect dots when real (low sleep → low energy → worse habits). Account for day type — workday with zero social is normal, free day with zero social is worth noting. If they did something small (just 5 pages) acknowledge the minimum win. If alcohol was logged, note the sleep/recovery consequence neutrally. One tiny concrete action for tomorrow. 2-3 short paragraphs. No bullets. No emoji. Max 180 words.';
 
   try{
     const text=await callAI(prov,prompt);
-    textEl.innerHTML=text.split('\n\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+    let html='';
+    text.split('\n\n').filter(Boolean).forEach(function(para){html+='<p>'+para+'</p>'});
+    textEl.innerHTML=html;
   }catch(e){
-    const msg=e.message==='NO_KEY'?`Configure ${p.label} key in Config.`:`Error: ${e.message}`;
-    textEl.innerHTML=`<p style="font-family:var(--mono);font-size:9.5px;color:var(--red);font-style:normal">${msg}</p>`;
+    const msg=e.message==='NO_KEY'?'Configure '+p.label+' key in Config.':'Error: '+e.message;
+    textEl.innerHTML='<p style="font-family:var(--mono);font-size:9.5px;color:var(--red);font-style:normal">'+msg+'</p>';
   }
   document.getElementById('btn-ai').disabled=false;
 }
@@ -1412,29 +1350,60 @@ Rules:
 /* ══════════════════════════════════════════════════
    ANALYTICS UTILS
 ══════════════════════════════════════════════════ */
-function getLast(n){const r=[];for(let i=n-1;i>=0;i--){const d=addD(today(),-i);r.push({date:d,data:getDay(d)||DEF_DAY()})}return r}
-function avg(arr){const v=arr.filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
-
-function lineChart(values,opts={}){
-  const{w=460,h=52,color='var(--acc)'}=opts;
-  const valid=values.filter(v=>v!=null);
-  if(valid.length<2)return`<div class="no-data">// insufficient data yet</div>`;
-  const mn=Math.min(...valid),mx=Math.max(...valid),rng=mx-mn||1;
-  const px=8,py=5,cw=w-px*2,ch=h-py*2;
-  const pts=values.map((v,i)=>v==null?null:{x:px+(i/(values.length-1))*cw,y:py+ch-((v-mn)/rng)*ch});
-  let path='';
-  pts.forEach((p,i)=>{if(!p)return;const prev=pts.slice(0,i).reverse().find(Boolean);path+=prev?` L${p.x},${p.y}`:`M${p.x},${p.y}`});
-  return`<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none">
-    <path d="${path}" fill="none" stroke="${color}" stroke-width="1.2" stroke-linecap="square" opacity=".9"/>
-    ${pts.filter(Boolean).map(p=>`<circle cx="${p.x}" cy="${p.y}" r="1.6" fill="${color}"/>`).join('')}
-  </svg>`;
+function getLast(n){
+  const r=[];
+  for(let i=n-1;i>=0;i--){const d=addD(today(),-i);r.push({date:d,data:getDay(d)||DEF_DAY()})}
+  return r;
+}
+function avg(arr){
+  const v=arr.filter(function(x){return x!=null});
+  return v.length?v.reduce(function(a,b){return a+b},0)/v.length:null;
 }
 
-function deltaEl(cur,prev,unit=''){
+function lineChart(values,opts){
+  opts=opts||{};
+  const w=opts.w||460,h=opts.h||52,color=opts.color||'var(--acc)';
+  const valid=values.filter(function(v){return v!=null});
+  if(valid.length<2)return'<div class="no-data">// insufficient data yet</div>';
+  const mn=Math.min.apply(null,valid),mx=Math.max.apply(null,valid),rng=mx-mn||1;
+  const px=8,py=5,cw=w-px*2,ch=h-py*2;
+  const pts=values.map(function(v,i){
+    return v==null?null:{x:px+(i/(values.length-1))*cw,y:py+ch-((v-mn)/rng)*ch};
+  });
+  let path='';
+  pts.forEach(function(p,i){
+    if(!p)return;
+    const prev=pts.slice(0,i).reverse().find(Boolean);
+    path+=prev?(' L'+p.x+','+p.y):('M'+p.x+','+p.y);
+  });
+  let circles='';
+  pts.filter(Boolean).forEach(function(p){
+    circles+='<circle cx="'+p.x+'" cy="'+p.y+'" r="1.6" fill="'+color+'"/>';
+  });
+  return '<svg viewBox="0 0 '+w+' '+h+'" width="100%" height="'+h+'" preserveAspectRatio="none">'
+    +'<path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="1.2" stroke-linecap="square" opacity=".9"/>'
+    +circles+'</svg>';
+}
+
+function deltaEl(cur,prev,unit){
+  unit=unit||'';
   if(cur==null||prev==null)return'';
   const d=cur-prev;
-  if(Math.abs(d)<0.15)return`<div class="stat-delta dn">= stable</div>`;
-  return d>0?`<div class="stat-delta du">↑ +${d.toFixed(1)}${unit}</div>`:`<div class="stat-delta dd">↓ ${d.toFixed(1)}${unit}</div>`;
+  if(Math.abs(d)<0.15)return'<div class="stat-delta dn">= stable</div>';
+  return d>0
+    ?'<div class="stat-delta du">↑ +'+d.toFixed(1)+unit+'</div>'
+    :'<div class="stat-delta dd">↓ '+d.toFixed(1)+unit+'</div>';
+}
+
+function statBox(lbl,val,sub,delta){
+  const emptyClass=val==null?' empty':'';
+  const valTxt=val!=null?val:'—';
+  return '<div class="stat">'
+    +'<div class="stat-lbl">'+lbl+'</div>'
+    +'<div class="stat-val'+emptyClass+'">'+valTxt+'</div>'
+    +(sub?'<div class="stat-sub">'+sub+'</div>':'')
+    +(delta||'')
+    +'</div>';
 }
 
 /* ══════════════════════════════════════════════════
@@ -1443,70 +1412,63 @@ function deltaEl(cur,prev,unit=''){
 function renderWeek(){
   const el=document.getElementById('v-week');
   const days=getLast(7),prev=getLast(14).slice(0,7);
-  const moods=days.map(d=>d.data.mood);
-  const energies=days.map(d=>d.data.energy);
-  const sleeps=days.map(d=>d.data.sleepH);
-  const calms=days.map(d=>d.data.anxiety);
-  const aM=avg(moods),aE=avg(energies),aS=avg(sleeps),aQ=avg(days.map(d=>d.data.sleepQ));
-  const pM=avg(prev.map(d=>d.data.mood)),pS=avg(prev.map(d=>d.data.sleepH));
-  const labels=days.map(d=>WDAYS[d.date.getDay()].slice(0,3).toUpperCase());
-  const habStats=ALL_HABS.filter(h=>h.type==='bool'&&h.weight>0).map(h=>({label:h.label,done:days.filter(d=>d.data.habits[h.id]).length}));
-  const dayScores=days.map(d=>{
+  const moods=days.map(function(d){return d.data.mood});
+  const energies=days.map(function(d){return d.data.energy});
+  const sleeps=days.map(function(d){return d.data.sleepH});
+  const aM=avg(moods),aE=avg(energies),aS=avg(sleeps),aQ=avg(days.map(function(d){return d.data.sleepQ}));
+  const pM=avg(prev.map(function(d){return d.data.mood})),pS=avg(prev.map(function(d){return d.data.sleepH}));
+  const labels=days.map(function(d){return WDAYS[d.date.getDay()].slice(0,3).toUpperCase()});
+  const alcDays=days.filter(function(d){return(parseInt(d.data.habits&&d.data.habits.alcohol_amt)||0)>0}).length;
+  const waterAvg=avg(days.map(function(d){return parseInt(d.data.habits&&d.data.habits.water)||0}));
+
+  const habStats=ALL_HABS.filter(function(h){return h.type==='bool'&&h.weight>0}).map(function(h){
+    return{label:h.label,done:days.filter(function(d){return d.data.habits&&d.data.habits[h.id]}).length};
+  });
+
+  const dayScores=days.map(function(d){
     const f=d.data.mood!=null||d.data.sleepH!=null||Object.values(d.data.habits||{}).some(Boolean);
     return f?calcScore(d.data):null;
   });
-  const alcDays=days.filter(d=>(parseInt(d.data.habits?.alcohol_amt)||0)>0).length;
-  const waterAvg=avg(days.map(d=>parseInt(d.data.habits?.water)||0));
 
-  el.innerHTML=`
-<div class="ph">
-  <div class="ph-left"><div class="ph-title">WEEK VIEW</div><div class="ph-sub">${fmtShort(days[0].date)} – ${fmtShort(days[6].date)}</div></div>
-</div>
+  let scoreCells='';
+  days.forEach(function(d,i){
+    const s=dayScores[i];
+    scoreCells+='<div style="border:1px solid var(--bd);background:var(--bg3);padding:6px 8px;text-align:center;min-width:50px;flex:1">'
+      +'<div style="font-family:var(--mono);font-size:7.5px;color:var(--t3)">'+labels[i]+'</div>'
+      +'<div style="font-family:var(--mono);font-size:17px;color:'+(s?'var(--acc2)':'var(--t4)')+';margin-top:2px">'+(s?s.grade:'·')+'</div>'
+      +'</div>';
+  });
 
-<div class="stat-grid">
-  <div class="stat"><div class="stat-lbl">Avg Mood</div><div class="stat-val ${aM==null?'empty':''}">${aM!=null?aM.toFixed(1):'—'}</div>${deltaEl(aM,pM)}</div>
-  <div class="stat"><div class="stat-lbl">Avg Energy</div><div class="stat-val ${aE==null?'empty':''}">${aE!=null?aE.toFixed(1):'—'}</div></div>
-  <div class="stat"><div class="stat-lbl">Avg Sleep</div><div class="stat-val ${aS==null?'empty':''}">${aS!=null?aS.toFixed(1)+'h':'—'}</div>${deltaEl(aS,pS,'h')}</div>
-  <div class="stat"><div class="stat-lbl">Sleep Quality</div><div class="stat-val ${aQ==null?'empty':''}">${aQ!=null?aQ.toFixed(1):'—'}</div></div>
-  <div class="stat"><div class="stat-lbl">Avg Water</div><div class="stat-val ${waterAvg==null?'empty':''}">${waterAvg!=null?waterAvg.toFixed(0)+'gl':'—'}</div></div>
-  <div class="stat"><div class="stat-lbl">Alcohol days</div><div class="stat-val ${alcDays>0?'':'empty'}" style="${alcDays>2?'color:var(--red)':''}">${alcDays}/7</div></div>
-</div>
+  let habTableRows='';
+  habStats.forEach(function(h){
+    const pct=Math.round(h.done/7*100);
+    const barColor=h.done>=6?'var(--grn)':h.done>=4?'var(--acc)':'var(--red)';
+    habTableRows+='<tr>'
+      +'<td>'+h.label+'</td>'
+      +'<td><div class="hbar-wrap"><div class="hbar" style="width:'+pct+'%;background:'+barColor+'"></div></div></td>'
+      +'<td>'+h.done+'/7 · '+pct+'%</td>'
+      +'</tr>';
+  });
 
-<div class="sec">
-  <div class="sec-hd"><span class="sec-label">Daily Scores</span></div>
-  <div style="display:flex;gap:3px;flex-wrap:wrap">
-    ${days.map((d,i)=>{
-      const s=dayScores[i];
-      return`<div style="border:1px solid var(--bd);background:var(--bg3);padding:6px 8px;text-align:center;min-width:50px;flex:1">
-        <div style="font-family:var(--mono);font-size:7.5px;color:var(--t3)">${labels[i]}</div>
-        <div style="font-family:var(--mono);font-size:17px;color:${s?'var(--acc2)':'var(--t4)'};margin-top:2px">${s?s.grade:'·'}</div>
-      </div>`;
-    }).join('')}
-  </div>
-</div>
+  let lblSpans='';
+  labels.forEach(function(l){lblSpans+='<span>'+l+'</span>'});
 
-<div class="chart-wrap">
-  <div class="chart-lbl">// MOOD — 7 days</div>
-  ${lineChart(moods)}
-  <div class="chart-lbls">${labels.map(l=>`<span>${l}</span>`).join('')}</div>
-</div>
-
-<div class="chart-wrap">
-  <div class="chart-lbl">// SLEEP (hours)</div>
-  ${lineChart(sleeps,{color:'var(--blu)'})}
-  <div class="chart-lbls">${labels.map(l=>`<span>${l}</span>`).join('')}</div>
-</div>
-
-<div class="sec">
-  <div class="sec-hd"><span class="sec-label">Habit Adherence</span><span class="sec-count">7-day</span></div>
-  <table class="hab-table">
-    ${habStats.map(h=>`<tr>
-      <td>${h.label}</td>
-      <td><div class="hbar-wrap"><div class="hbar" style="width:${Math.round(h.done/7*100)}%;background:${h.done>=6?'var(--grn)':h.done>=4?'var(--acc)':'var(--red)'}"></div></div></td>
-      <td>${h.done}/7 · ${Math.round(h.done/7*100)}%</td>
-    </tr>`).join('')}
-  </table>
-</div>`;
+  el.innerHTML=
+    '<div class="ph"><div class="ph-left"><div class="ph-title">WEEK VIEW</div><div class="ph-sub">'+fmtShort(days[0].date)+' – '+fmtShort(days[6].date)+'</div></div></div>'
+    +'<div class="stat-grid">'
+    +statBox('Avg Mood',aM!=null?aM.toFixed(1):null,'',deltaEl(aM,pM))
+    +statBox('Avg Energy',aE!=null?aE.toFixed(1):null)
+    +statBox('Avg Sleep',aS!=null?aS.toFixed(1)+'h':null,'',deltaEl(aS,pS,'h'))
+    +statBox('Sleep Quality',aQ!=null?aQ.toFixed(1):null)
+    +statBox('Avg Water',waterAvg!=null?waterAvg.toFixed(0)+'gl':null)
+    +statBox('Alcohol days',alcDays+'/7','',alcDays>2?'<div class="stat-delta dd">review this</div>':'')
+    +'</div>'
+    +'<div class="sec"><div class="sec-hd"><span class="sec-label">Daily Scores</span></div>'
+    +'<div style="display:flex;gap:3px;flex-wrap:wrap">'+scoreCells+'</div></div>'
+    +'<div class="chart-wrap"><div class="chart-lbl">// MOOD — 7 days</div>'+lineChart(moods)+'<div class="chart-lbls">'+lblSpans+'</div></div>'
+    +'<div class="chart-wrap"><div class="chart-lbl">// SLEEP (hours)</div>'+lineChart(sleeps,{color:'var(--blu)'})+'<div class="chart-lbls">'+lblSpans+'</div></div>'
+    +'<div class="sec"><div class="sec-hd"><span class="sec-label">Habit Adherence</span><span class="sec-count">7-day</span></div>'
+    +'<table class="hab-table">'+habTableRows+'</table></div>';
 }
 
 /* ══════════════════════════════════════════════════
@@ -1515,12 +1477,15 @@ function renderWeek(){
 function renderMonth(){
   const el=document.getElementById('v-month');
   const days=getLast(30),prev=getLast(60).slice(0,30);
-  const moods=days.map(d=>d.data.mood);
-  const aM=avg(moods),aE=avg(days.map(d=>d.data.energy)),aS=avg(days.map(d=>d.data.sleepH));
-  const pM=avg(prev.map(d=>d.data.mood)),pS=avg(prev.map(d=>d.data.sleepH));
-  const recorded=days.filter(d=>d.data.mood!=null).length;
-  const habStats=ALL_HABS.filter(h=>h.type==='bool'&&h.weight>0).map(h=>({label:h.label,done:days.filter(d=>d.data.habits[h.id]).length}));
-  const alcTotal=days.reduce((s,d)=>s+(parseInt(d.data.habits?.alcohol_amt)||0),0);
+  const moods=days.map(function(d){return d.data.mood});
+  const aM=avg(moods),aE=avg(days.map(function(d){return d.data.energy})),aS=avg(days.map(function(d){return d.data.sleepH}));
+  const pM=avg(prev.map(function(d){return d.data.mood})),pS=avg(prev.map(function(d){return d.data.sleepH}));
+  const recorded=days.filter(function(d){return d.data.mood!=null}).length;
+  const alcTotal=days.reduce(function(s,d){return s+(parseInt(d.data.habits&&d.data.habits.alcohol_amt)||0)},0);
+
+  const habStats=ALL_HABS.filter(function(h){return h.type==='bool'&&h.weight>0}).map(function(h){
+    return{label:h.label,done:days.filter(function(d){return d.data.habits&&d.data.habits[h.id]}).length};
+  });
 
   function mc(v){
     if(v==null)return'var(--bg5)';
@@ -1530,63 +1495,65 @@ function renderMonth(){
     return'var(--red)';
   }
 
-  el.innerHTML=`
-<div class="ph">
-  <div class="ph-left"><div class="ph-title">THIS MONTH</div><div class="ph-sub">${fmtShort(days[0].date)} – ${fmtShort(days[29].date)}</div></div>
-</div>
+  let moodDots='';
+  days.forEach(function(d){
+    const op=d.data.mood!=null?(0.3+(d.data.mood/10)*0.7).toFixed(2):'1';
+    moodDots+='<div class="mood-dot" title="'+fmtShort(d.date)+(d.data.mood!=null?' · '+d.data.mood+'/10':'')+'" style="background:'+mc(d.data.mood)+';opacity:'+op+'"></div>';
+  });
 
-<div class="stat-grid">
-  <div class="stat"><div class="stat-lbl">Avg Mood</div><div class="stat-val ${aM==null?'empty':''}">${aM!=null?aM.toFixed(1):'—'}</div>${deltaEl(aM,pM)}</div>
-  <div class="stat"><div class="stat-lbl">Avg Energy</div><div class="stat-val ${aE==null?'empty':''}">${aE!=null?aE.toFixed(1):'—'}</div></div>
-  <div class="stat"><div class="stat-lbl">Avg Sleep</div><div class="stat-val ${aS==null?'empty':''}">${aS!=null?aS.toFixed(1)+'h':'—'}</div>${deltaEl(aS,pS,'h')}</div>
-  <div class="stat"><div class="stat-lbl">Days logged</div><div class="stat-val">${recorded}</div><div class="stat-sub">of 30</div></div>
-  <div class="stat"><div class="stat-lbl">Drinks (total)</div><div class="stat-val" style="${alcTotal>14?'color:var(--red)':''}">${alcTotal}</div><div class="stat-sub">${alcTotal===0?'alcohol-free month':alcTotal<=7?'moderate':'review this'}</div></div>
-</div>
+  let habTableRows='';
+  habStats.forEach(function(h){
+    const pct=Math.round(h.done/30*100);
+    const barColor=h.done>=21?'var(--grn)':h.done>=12?'var(--acc)':'var(--red)';
+    habTableRows+='<tr>'
+      +'<td>'+h.label+'</td>'
+      +'<td><div class="hbar-wrap" style="width:82px"><div class="hbar" style="width:'+pct+'%;background:'+barColor+'"></div></div></td>'
+      +'<td>'+h.done+'/30 · '+pct+'%</td>'
+      +'</tr>';
+  });
 
-<div class="chart-wrap">
-  <div class="chart-lbl">// MOOD MAP — 30 days</div>
-  <div class="mood-grid">${days.map(d=>`<div class="mood-dot" title="${fmtShort(d.date)}${d.data.mood!=null?' · '+d.data.mood+'/10':''}" style="background:${mc(d.data.mood)};opacity:${d.data.mood!=null?(0.3+(d.data.mood/10)*0.7).toFixed(2):1}"></div>`).join('')}</div>
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--grn)"></div>8–10</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--acc)"></div>6–7</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--t3)"></div>4–5</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>&lt;4</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--bg5);border:1px solid var(--bd2)"></div>no log</div>
-  </div>
-</div>
+  const alcSub=alcTotal===0?'alcohol-free month':alcTotal<=7?'moderate':'review this';
+  const alcColor=alcTotal>14?'style="color:var(--red)"':'';
 
-<div class="chart-wrap">
-  <div class="chart-lbl">// MOOD TREND</div>
-  ${lineChart(moods,{h:60})}
-</div>
-
-<div class="sec">
-  <div class="sec-hd"><span class="sec-label">Habit Adherence — 30 days</span></div>
-  <table class="hab-table">
-    ${habStats.map(h=>`<tr>
-      <td>${h.label}</td>
-      <td><div class="hbar-wrap" style="width:82px"><div class="hbar" style="width:${Math.round(h.done/30*100)}%;background:${h.done>=21?'var(--grn)':h.done>=12?'var(--acc)':'var(--red)'}"></div></div></td>
-      <td>${h.done}/30 · ${Math.round(h.done/30*100)}%</td>
-    </tr>`).join('')}
-  </table>
-</div>`;
+  el.innerHTML=
+    '<div class="ph"><div class="ph-left"><div class="ph-title">THIS MONTH</div><div class="ph-sub">'+fmtShort(days[0].date)+' – '+fmtShort(days[29].date)+'</div></div></div>'
+    +'<div class="stat-grid">'
+    +statBox('Avg Mood',aM!=null?aM.toFixed(1):null,'',deltaEl(aM,pM))
+    +statBox('Avg Energy',aE!=null?aE.toFixed(1):null)
+    +statBox('Avg Sleep',aS!=null?aS.toFixed(1)+'h':null,'',deltaEl(aS,pS,'h'))
+    +statBox('Days logged',recorded,'of 30')
+    +'<div class="stat"><div class="stat-lbl">Drinks (total)</div><div class="stat-val" '+alcColor+'>'+alcTotal+'</div><div class="stat-sub">'+alcSub+'</div></div>'
+    +'</div>'
+    +'<div class="chart-wrap"><div class="chart-lbl">// MOOD MAP — 30 days</div>'
+    +'<div class="mood-grid">'+moodDots+'</div>'
+    +'<div class="legend">'
+    +'<div class="legend-item"><div class="legend-dot" style="background:var(--grn)"></div>8-10</div>'
+    +'<div class="legend-item"><div class="legend-dot" style="background:var(--acc)"></div>6-7</div>'
+    +'<div class="legend-item"><div class="legend-dot" style="background:var(--t3)"></div>4-5</div>'
+    +'<div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>&lt;4</div>'
+    +'<div class="legend-item"><div class="legend-dot" style="background:var(--bg5);border:1px solid var(--bd2)"></div>no log</div>'
+    +'</div></div>'
+    +'<div class="chart-wrap"><div class="chart-lbl">// MOOD TREND</div>'+lineChart(moods,{h:60})+'</div>'
+    +'<div class="sec"><div class="sec-hd"><span class="sec-label">Habit Adherence — 30 days</span></div>'
+    +'<table class="hab-table">'+habTableRows+'</table></div>';
 }
 
 /* ══════════════════════════════════════════════════
-   RENDER MEDIA — Cleaner, progress-focused
+   RENDER MEDIA
 ══════════════════════════════════════════════════ */
 function renderMedia(){
   const el=document.getElementById('v-media');
   const media=getMedia();
-  const def=MEDIA_DEF[mediaTab];
   const items=media[mediaTab]||[];
 
-  const active =items.filter(i=>['Playing','Watching','Reading'].includes(i.status));
-  const paused =items.filter(i=>i.status==='Paused');
-  const backlog=items.filter(i=>i.status==='Backlog');
-  const done   =items.filter(i=>['Completed','Finished','Watched'].includes(i.status));
+  const active =items.filter(function(i){return['Playing','Watching','Reading'].indexOf(i.status)>=0});
+  const paused =items.filter(function(i){return i.status==='Paused'});
+  const backlog =items.filter(function(i){return i.status==='Backlog'});
+  const done    =items.filter(function(i){return['Completed','Finished','Watched'].indexOf(i.status)>=0});
 
-  const ct=t=>(media[t]||[]).filter(i=>['Playing','Watching','Reading'].includes(i.status)).length;
+  function ct(t){
+    return(media[t]||[]).filter(function(i){return['Playing','Watching','Reading'].indexOf(i.status)>=0}).length;
+  }
 
   function progressPct(item){
     if(!item.progress)return null;
@@ -1596,68 +1563,96 @@ function renderMedia(){
     return m?Math.min(parseInt(m[1]),100):null;
   }
 
-  const mpRow=(item,idx)=>{
+  function mpRow(item,idx){
     const pct=progressPct(item);
     const col=STATUS_DOT_COLOR[item.status]||'var(--t4)';
-    return`<div class="media-progress-row">
-      <div class="mp-status-dot" style="background:${col}"></div>
-      <div class="mp-info">
-        <div class="mp-title">${item.title}</div>
-        <div class="mp-meta">${[item.kind||null,item.author||null,item.progress||null].filter(Boolean).join(' · ')||item.status}</div>
-      </div>
-      ${pct!=null&&mediaTab==='books'?`<div class="mp-progress-track"><div class="mp-progress-fill" style="width:${pct}%"></div></div>`:''}
-      ${item.rating?`<div class="mp-rating">${item.rating}/10</div>`:''}
-      <button class="mp-del" data-idx="${idx}">×</button>
-    </div>`;
-  };
+    const metaParts=[item.kind||null,item.author||null,item.progress||null].filter(Boolean);
+    const meta=metaParts.length?metaParts.join(' · '):item.status;
+    let progressBar='';
+    if(pct!=null&&mediaTab==='books'){
+      progressBar='<div class="mp-progress-track"><div class="mp-progress-fill" style="width:'+pct+'%"></div></div>';
+    }
+    const rating=item.rating?'<div class="mp-rating">'+item.rating+'/10</div>':'';
+    return '<div class="media-progress-row">'
+      +'<div class="mp-status-dot" style="background:'+col+'"></div>'
+      +'<div class="mp-info">'
+      +'<div class="mp-title">'+item.title+'</div>'
+      +'<div class="mp-meta">'+meta+'</div>'
+      +'</div>'
+      +progressBar+rating
+      +'<button class="mp-del" data-idx="'+idx+'">×</button>'
+      +'</div>';
+  }
 
-  el.innerHTML=`
-<div class="ph">
-  <div class="ph-left"><div class="ph-title">LIBRARY</div></div>
-</div>
-
-<div class="mtabs">
-  ${Object.entries(MEDIA_DEF).map(([k,v])=>`
-    <button class="mtab${mediaTab===k?' on':''}" data-tab="${k}">
-      ${v.label}<span class="mtab-ct">${ct(k)||''}</span>
-    </button>`).join('')}
-</div>
-
-<div class="media-cols">
-  <div>
-    <div class="media-block">
-      <div class="media-block-hd">
-        <span class="media-block-title">▸ IN PROGRESS${active.length?` (${active.length})`:''}</span>
-        <button class="media-col-add" id="btn-add">+ ADD</button>
-      </div>
-      ${active.length?active.map(item=>mpRow(item,items.indexOf(item))).join(''):`<div class="mi-empty">// nothing active</div>`}
-    </div>
-    ${paused.length?`
-    <div class="media-block">
-      <div class="media-block-hd"><span class="media-block-title">▸ PAUSED (${paused.length})</span></div>
-      ${paused.map(item=>mpRow(item,items.indexOf(item))).join('')}
-    </div>`:''}
-  </div>
-
-  <div>
-    <div class="media-block">
-      <div class="media-block-hd"><span class="media-block-title">▸ BACKLOG${backlog.length?` (${backlog.length})`:''}</span></div>
-      ${backlog.length?backlog.map(item=>mpRow(item,items.indexOf(item))).join(''):`<div class="mi-empty">// empty</div>`}
-    </div>
-    ${done.length?`
-    <div class="media-block">
-      <div class="media-block-hd"><span class="media-block-title">▸ DONE (${done.length})</span></div>
-      ${done.slice(0,8).map(item=>mpRow(item,items.indexOf(item))).join('')}
-      ${done.length>8?`<div class="mi-empty" style="margin-top:3px">// +${done.length-8} more in Year Log</div>`:''}
-    </div>`:''}`}
-  </div>
-</div>`;
-
-  el.querySelectorAll('.mtab').forEach(t=>{t.onclick=()=>{mediaTab=t.dataset.tab;renderMedia()}});
-  el.querySelectorAll('.mp-del').forEach(b=>{
-    b.onclick=()=>{const m=getMedia();m[mediaTab].splice(parseInt(b.dataset.idx),1);saveMedia(m);renderMedia()};
+  // Tabs
+  let tabsHtml='';
+  Object.keys(MEDIA_DEF).forEach(function(k){
+    const v=MEDIA_DEF[k];
+    const onCls=mediaTab===k?' on':'';
+    const ctNum=ct(k)||'';
+    tabsHtml+='<button class="mtab'+onCls+'" data-tab="'+k+'">'+v.label+'<span class="mtab-ct">'+ctNum+'</span></button>';
   });
-  el.querySelector('#btn-add').onclick=()=>openAddModal(mediaTab);
+
+  // Active block
+  let activeRows='';
+  active.forEach(function(item){activeRows+=mpRow(item,items.indexOf(item))});
+  const activeBlock='<div class="media-block">'
+    +'<div class="media-block-hd">'
+    +'<span class="media-block-title">▸ IN PROGRESS'+(active.length?' ('+active.length+')':'')+'</span>'
+    +'<button class="media-col-add" id="btn-add">+ ADD</button>'
+    +'</div>'
+    +(active.length?activeRows:'<div class="mi-empty">// nothing active</div>')
+    +'</div>';
+
+  // Paused block
+  let pausedBlock='';
+  if(paused.length){
+    let rows='';
+    paused.forEach(function(item){rows+=mpRow(item,items.indexOf(item))});
+    pausedBlock='<div class="media-block">'
+      +'<div class="media-block-hd"><span class="media-block-title">▸ PAUSED ('+paused.length+')</span></div>'
+      +rows+'</div>';
+  }
+
+  // Backlog block
+  let backlogRows='';
+  backlog.forEach(function(item){backlogRows+=mpRow(item,items.indexOf(item))});
+  const backlogBlock='<div class="media-block">'
+    +'<div class="media-block-hd"><span class="media-block-title">▸ BACKLOG'+(backlog.length?' ('+backlog.length+')':'')+'</span></div>'
+    +(backlog.length?backlogRows:'<div class="mi-empty">// empty</div>')
+    +'</div>';
+
+  // Done block
+  let doneBlock='';
+  if(done.length){
+    let rows='';
+    done.slice(0,8).forEach(function(item){rows+=mpRow(item,items.indexOf(item))});
+    if(done.length>8)rows+='<div class="mi-empty" style="margin-top:3px">// +'+(done.length-8)+' more in Year Log</div>';
+    doneBlock='<div class="media-block">'
+      +'<div class="media-block-hd"><span class="media-block-title">▸ DONE ('+done.length+')</span></div>'
+      +rows+'</div>';
+  }
+
+  el.innerHTML=
+    '<div class="ph"><div class="ph-left"><div class="ph-title">LIBRARY</div></div></div>'
+    +'<div class="mtabs">'+tabsHtml+'</div>'
+    +'<div class="media-cols">'
+    +'<div>'+activeBlock+pausedBlock+'</div>'
+    +'<div>'+backlogBlock+doneBlock+'</div>'
+    +'</div>';
+
+  el.querySelectorAll('.mtab').forEach(function(t){
+    t.onclick=function(){mediaTab=t.dataset.tab;renderMedia()};
+  });
+  el.querySelectorAll('.mp-del').forEach(function(b){
+    b.onclick=function(){
+      const m=getMedia();
+      m[mediaTab].splice(parseInt(b.dataset.idx),1);
+      saveMedia(m);renderMedia();
+    };
+  });
+  const addBtn=el.querySelector('#btn-add');
+  if(addBtn)addBtn.onclick=function(){openAddModal(mediaTab)};
 }
 
 /* ══════════════════════════════════════════════════
@@ -1668,44 +1663,49 @@ function renderYear(){
   const media=getMedia();
   const yr=thisYear();
   const completed=[];
-  Object.entries(MEDIA_DEF).forEach(([type,def])=>{
-    (media[type]||[]).forEach(item=>{
-      if(def.yearDone.includes(item.status)&&(!item.year||item.year===yr)){
-        completed.push({...item,_type:type});
+  Object.keys(MEDIA_DEF).forEach(function(type){
+    const def=MEDIA_DEF[type];
+    (media[type]||[]).forEach(function(item){
+      if(def.yearDone.indexOf(item.status)>=0&&(!item.year||item.year===yr)){
+        const it=Object.assign({},item,{_type:type});
+        completed.push(it);
       }
     });
   });
-  const byType={};
-  Object.keys(MEDIA_DEF).forEach(t=>{byType[t]=completed.filter(i=>i._type===t)});
-  const rated=completed.filter(i=>i.rating);
-  const avgR=rated.length?(rated.reduce((a,b)=>a+(b.rating||0),0)/rated.length).toFixed(1):null;
 
-  el.innerHTML=`
-<div class="ph">
-  <div class="ph-left"><div class="ph-title">THIS YEAR</div><div class="ph-sub">completed in ${yr}</div></div>
-</div>
-<div class="stat-grid" style="margin-bottom:1.1rem">
-  <div class="stat"><div class="stat-lbl">Total done</div><div class="stat-val">${completed.length}</div></div>
-  <div class="stat"><div class="stat-lbl">Games</div><div class="stat-val">${byType.games?.length||0}</div></div>
-  <div class="stat"><div class="stat-lbl">Shows/Films</div><div class="stat-val">${byType.screen?.length||0}</div></div>
-  <div class="stat"><div class="stat-lbl">Books</div><div class="stat-val">${byType.books?.length||0}</div></div>
-  ${avgR?`<div class="stat"><div class="stat-lbl">Avg Score</div><div class="stat-val">${avgR}</div><div class="stat-sub">out of 10</div></div>`:''}
-</div>
-${completed.length===0?`<div style="font-family:var(--mono);font-size:9.5px;color:var(--t4);padding:.4rem 0">// Mark items as completed and they appear here.</div>`:''}
-${Object.entries(byType).map(([type,items])=>{
-  if(!items.length)return'';
-  return`<div class="sec">
-    <div class="sec-hd"><span class="sec-label">${MEDIA_DEF[type].label}</span></div>
-    <div class="year-cards">${items.map(item=>`
-      <div class="ycard">
-        ${item.kind?`<div class="ycard-type">${item.kind}</div>`:''}
-        <div class="ycard-title">${item.title}</div>
-        <div class="ycard-meta">${item.author||item.progress||''}</div>
-        ${item.rating?`<div class="ycard-score">${item.rating}/10</div>`:''}
-      </div>`).join('')}
-    </div>
-  </div>`;
-}).join('')}`;
+  const byType={};
+  Object.keys(MEDIA_DEF).forEach(function(t){byType[t]=completed.filter(function(i){return i._type===t})});
+  const rated=completed.filter(function(i){return i.rating});
+  const avgR=rated.length?(rated.reduce(function(a,b){return a+(b.rating||0)},0)/rated.length).toFixed(1):null;
+
+  let stats='<div class="stat-grid" style="margin-bottom:1.1rem">'
+    +statBox('Total done',completed.length)
+    +statBox('Games',byType.games?byType.games.length:0)
+    +statBox('Shows/Films',byType.screen?byType.screen.length:0)
+    +statBox('Books',byType.books?byType.books.length:0);
+  if(avgR)stats+='<div class="stat"><div class="stat-lbl">Avg Score</div><div class="stat-val">'+avgR+'</div><div class="stat-sub">out of 10</div></div>';
+  stats+='</div>';
+
+  let typesSections='';
+  Object.keys(byType).forEach(function(type){
+    const items=byType[type];
+    if(!items.length)return;
+    let cards='';
+    items.forEach(function(item){
+      const typeTag=item.kind?'<div class="ycard-type">'+item.kind+'</div>':'';
+      const metaTag=item.author||item.progress?'<div class="ycard-meta">'+(item.author||item.progress)+'</div>':'';
+      const scoreTag=item.rating?'<div class="ycard-score">'+item.rating+'/10</div>':'';
+      cards+='<div class="ycard">'+typeTag+'<div class="ycard-title">'+item.title+'</div>'+metaTag+scoreTag+'</div>';
+    });
+    typesSections+='<div class="sec"><div class="sec-hd"><span class="sec-label">'+MEDIA_DEF[type].label+'</span></div>'
+      +'<div class="year-cards">'+cards+'</div></div>';
+  });
+
+  const emptyMsg=completed.length===0?'<div style="font-family:var(--mono);font-size:9.5px;color:var(--t4);padding:.4rem 0">// Mark items as completed and they appear here.</div>':'';
+
+  el.innerHTML=
+    '<div class="ph"><div class="ph-left"><div class="ph-title">THIS YEAR</div><div class="ph-sub">completed in '+yr+'</div></div></div>'
+    +stats+emptyMsg+typesSections;
 }
 
 /* ══════════════════════════════════════════════════
@@ -1715,64 +1715,96 @@ function openAddModal(type){
   const def=MEDIA_DEF[type];
   const modal=document.getElementById('modal');
   modal.classList.remove('hide');
-  modal.innerHTML=`<div class="mbox">
-    <div class="mbox-title">+ ${def.sing.toUpperCase()}</div>
-    ${def.fields.map(f=>`<div class="mf">
-      <div class="mf-label">${f.label}</div>
-      ${f.type==='select'
-        ?`<select class="mf-input" id="mf-${f.id}"><option value="">—</option>${f.opts.map(o=>`<option>${o}</option>`).join('')}</select>`
-        :`<input class="mf-input" type="${f.type||'text'}" id="mf-${f.id}" placeholder="${f.ph||''}"${f.min!=null?' min='+f.min:''}${f.max!=null?' max='+f.max:''}>`
-      }
-    </div>`).join('')}
-    <div class="mactions">
-      <button class="btn-s" id="m-cancel">CANCEL</button>
-      <button class="btn-p" id="m-save">ADD</button>
-    </div>
-  </div>`;
-  modal.querySelector('#m-cancel').onclick=()=>modal.classList.add('hide');
-  modal.onclick=e=>{if(e.target===modal)modal.classList.add('hide')};
-  modal.querySelector('#m-save').onclick=()=>{
-    const title=document.getElementById('mf-title')?.value.trim();
+
+  let fieldsHtml='';
+  def.fields.forEach(function(f){
+    let input='';
+    if(f.type==='select'){
+      let opts='<option value="">—</option>';
+      f.opts.forEach(function(o){opts+='<option>'+o+'</option>'});
+      input='<select class="mf-input" id="mf-'+f.id+'">'+opts+'</select>';
+    }else{
+      const minAttr=f.min!=null?' min='+f.min:'';
+      const maxAttr=f.max!=null?' max='+f.max:'';
+      const phAttr=f.ph?' placeholder="'+f.ph+'"':'';
+      input='<input class="mf-input" type="'+(f.type||'text')+'" id="mf-'+f.id+'"'+phAttr+minAttr+maxAttr+'>';
+    }
+    fieldsHtml+='<div class="mf"><div class="mf-label">'+f.label+'</div>'+input+'</div>';
+  });
+
+  modal.innerHTML='<div class="mbox">'
+    +'<div class="mbox-title">+ '+def.sing.toUpperCase()+'</div>'
+    +fieldsHtml
+    +'<div class="mactions">'
+    +'<button class="btn-s" id="m-cancel">CANCEL</button>'
+    +'<button class="btn-p" id="m-save">ADD</button>'
+    +'</div></div>';
+
+  modal.querySelector('#m-cancel').onclick=function(){modal.classList.add('hide')};
+  modal.onclick=function(e){if(e.target===modal)modal.classList.add('hide')};
+  modal.querySelector('#m-save').onclick=function(){
+    const titleEl=document.getElementById('mf-title');
+    const title=titleEl?titleEl.value.trim():'';
     if(!title)return;
     const item={id:Date.now()};
-    def.fields.forEach(f=>{const e=document.getElementById('mf-'+f.id);if(e)item[f.id]=f.type==='number'?(parseFloat(e.value)||null):e.value||null});
-    if(!item.status)item.status=def.fields.find(f=>f.id==='status')?.opts?.[0]||'';
-    if(def.yearDone.includes(item.status)&&!item.year)item.year=thisYear();
-    const m=getMedia();m[type].unshift(item);saveMedia(m);
-    modal.classList.add('hide');renderMedia();
+    def.fields.forEach(function(f){
+      const e=document.getElementById('mf-'+f.id);
+      if(e)item[f.id]=f.type==='number'?(parseFloat(e.value)||null):(e.value||null);
+    });
+    if(!item.status){
+      const sf=def.fields.find(function(f){return f.id==='status'});
+      item.status=sf&&sf.opts?sf.opts[0]:'';
+    }
+    if(def.yearDone.indexOf(item.status)>=0&&!item.year)item.year=thisYear();
+    const m=getMedia();
+    m[type].unshift(item);
+    saveMedia(m);
+    modal.classList.add('hide');
+    renderMedia();
   };
 }
 
 /* ══════════════════════════════════════════════════
    CONFIG MODAL
 ══════════════════════════════════════════════════ */
-function openConfig(msg=''){
+function openConfig(msg){
+  msg=msg||'';
   const modal=document.getElementById('modal');
   modal.classList.remove('hide');
-  modal.innerHTML=`<div class="mbox">
-    <div class="mbox-title">CONFIG — API KEYS</div>
-    ${msg?`<p style="font-family:var(--mono);font-size:8.5px;color:var(--red);margin-bottom:10px;letter-spacing:.06em">${msg}</p>`:''}
-    <div class="minfo">API keys are stored only in your browser's localStorage. Nothing leaves your device.</div>
-    ${Object.entries(AI).map(([k,p])=>`<div class="mf">
-      <div class="mf-label">${p.label}</div>
-      <input class="mf-input" type="password" id="key-${k}" value="${db.get(p.key)||''}" placeholder="${p.hint}">
-    </div>`).join('')}
-    <div class="mactions">
-      <button class="btn-s" id="s-cancel">CANCEL</button>
-      <button class="btn-p" id="s-save">SAVE</button>
-    </div>
-  </div>`;
-  modal.querySelector('#s-cancel').onclick=()=>modal.classList.add('hide');
-  modal.onclick=e=>{if(e.target===modal)modal.classList.add('hide')};
-  modal.querySelector('#s-save').onclick=()=>{
-    Object.entries(AI).forEach(([k,p])=>{
-      const v=document.getElementById('key-'+k)?.value.trim();
-      if(v)db.set(p.key,v);
+
+  let keyFields='';
+  Object.keys(AI).forEach(function(k){
+    const p=AI[k];
+    const val=db.get(p.key)||'';
+    keyFields+='<div class="mf"><div class="mf-label">'+p.label+'</div>'
+      +'<input class="mf-input" type="password" id="key-'+k+'" value="'+val+'" placeholder="'+p.hint+'"></div>';
+  });
+
+  const msgHtml=msg?'<p style="font-family:var(--mono);font-size:8.5px;color:var(--red);margin-bottom:10px;letter-spacing:.06em">'+msg+'</p>':'';
+
+  modal.innerHTML='<div class="mbox">'
+    +'<div class="mbox-title">CONFIG — API KEYS</div>'
+    +msgHtml
+    +'<div class="minfo">API keys are stored only in your browser localStorage. Nothing leaves your device.</div>'
+    +keyFields
+    +'<div class="mactions">'
+    +'<button class="btn-s" id="s-cancel">CANCEL</button>'
+    +'<button class="btn-p" id="s-save">SAVE</button>'
+    +'</div></div>';
+
+  modal.querySelector('#s-cancel').onclick=function(){modal.classList.add('hide')};
+  modal.onclick=function(e){if(e.target===modal)modal.classList.add('hide')};
+  modal.querySelector('#s-save').onclick=function(){
+    Object.keys(AI).forEach(function(k){
+      const p=AI[k];
+      const el=document.getElementById('key-'+k);
+      if(el){const v=el.value.trim();if(v)db.set(p.key,v);}
     });
     modal.classList.add('hide');
   };
 }
-document.getElementById('cfg-btn').onclick=()=>openConfig();
+
+document.getElementById('cfg-btn').onclick=function(){openConfig()};
 
 // ── INIT ───────────────────────────────────────────
 renderToday();
