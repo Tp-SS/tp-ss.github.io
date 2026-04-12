@@ -1,173 +1,940 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="https://tp-ss.github.io/PFP2024+.jpg" type="image/jpeg">    
-    <title>C:\Users\Tp></title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Courier New', Courier, monospace;
-            background: url('https://tp-ss.github.io/cns.gif') no-repeat center center fixed;
-            background-size: cover;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hub personal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ──────────────────────────────────────── */
+:root {
+  --bg:    #f8f6f2;
+  --bg2:   #efede8;
+  --bg3:   #e4e0d8;
+  --card:  #fdfcfa;
+  --bd:    rgba(0,0,0,.07);
+  --bd2:   rgba(0,0,0,.14);
+  --t1:    #1c1a17;
+  --t2:    #78736a;
+  --t3:    #b0aa9f;
+  --acc:   #1c1a17;
+  --acc-f: #fdfcfa;
+  --ok:    #2a6e4f;
+  --ok-bg: rgba(42,110,79,.1);
+  --warn:  #a3511a;
+  --sw:    218px;
+  --nh:    62px;
+  --r:     11px;
+  --rs:    7px;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans:  'Jost', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:   #131210;
+    --bg2:  #1e1c19;
+    --bg3:  #2a2722;
+    --card: #1a1815;
+    --bd:   rgba(255,255,255,.07);
+    --bd2:  rgba(255,255,255,.14);
+    --t1:   #f0ece4;
+    --t2:   #9e9789;
+    --t3:   #5e5a52;
+    --acc:  #f0ece4;
+    --acc-f:#131210;
+    --ok:   #5fb88a;
+    --ok-bg:rgba(95,184,138,.12);
+    --warn: #e0895a;
+  }
+}
 
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+/* ── RESET ───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body { font-family: var(--sans); font-size: 15px; line-height: 1.6; background: var(--bg); color: var(--t1); display: flex; height: 100%; }
+button { cursor: pointer; font: inherit; border: none; background: none; }
+input, textarea, select { font: inherit; }
+a { text-decoration: none; color: inherit; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 99px; }
 
-        .header img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin-bottom: 10px;
-        }
+/* ── SIDEBAR ─────────────────────────────────────── */
+#sb {
+  width: var(--sw);
+  min-height: 100vh;
+  border-right: 1px solid var(--bd);
+  padding: 1.75rem 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  position: fixed;
+  top: 0; left: 0;
+  background: var(--bg);
+  z-index: 20;
+  overflow-y: auto;
+}
+.sb-logo {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: .01em;
+  color: var(--t1);
+  padding: 0 .5rem;
+  line-height: 1.2;
+}
+.sb-logo span { display: block; font-size: 11px; font-family: var(--sans); font-weight: 300; color: var(--t3); letter-spacing: .06em; text-transform: uppercase; margin-top: 1px; }
+.sb-section { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); font-weight: 400; padding: .25rem .5rem; margin-top: .25rem; }
+.nb {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 10px;
+  border-radius: var(--rs);
+  color: var(--t2);
+  font-size: 13.5px;
+  font-weight: 400;
+  width: 100%;
+  text-align: left;
+  transition: background .1s, color .1s;
+}
+.nb:hover { background: var(--bg2); color: var(--t1); }
+.nb.on { background: var(--bg3); color: var(--t1); font-weight: 500; }
+.nb svg { flex-shrink: 0; opacity: .55; }
+.nb.on svg { opacity: 1; }
+.sb-bottom { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--bd); }
+.settings-btn { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: var(--rs); color: var(--t3); font-size: 12px; width: 100%; transition: background .1s, color .1s; }
+.settings-btn:hover { background: var(--bg2); color: var(--t2); }
 
-        .header h1 {
-            margin: 0;
-            font-size: 20px;
-        }
+/* ── MAIN ────────────────────────────────────────── */
+#main { margin-left: var(--sw); flex: 1; overflow-x: hidden; }
+.view { display: none; padding: 2.25rem 2.75rem; max-width: 880px; }
+.view.on { display: block; }
+@media (min-width: 1400px) { .view { padding: 2.5rem 3rem; } }
 
-        .terminal {
-            width: 95%;
-            max-width: 600px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #888888;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px;
-        }
+/* ── PAGE HEADER ─────────────────────────────────── */
+.ph { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap; }
+.ph-left {}
+.ph-title { font-family: var(--serif); font-size: 28px; font-weight: 400; letter-spacing: -.01em; line-height: 1.15; color: var(--t1); }
+.ph-sub { font-size: 12.5px; color: var(--t3); margin-top: 3px; font-weight: 300; }
 
-        .spotify {
-            width: 95%;
-            max-width: 600px;
-            margin: 20px;
-        }
+/* ── DATE NAV ────────────────────────────────────── */
+.dn { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.dn-btn { width: 28px; height: 28px; border: 1px solid var(--bd2); border-radius: var(--rs); color: var(--t2); display: flex; align-items: center; justify-content: center; font-size: 13px; transition: background .1s; }
+.dn-btn:hover { background: var(--bg2); }
+.dn-today { font-size: 11px; color: var(--t3); border: 1px solid var(--bd2); border-radius: 99px; padding: 2px 10px; transition: background .1s; }
+.dn-today:hover { background: var(--bg2); color: var(--t2); }
 
-        .line {
-            margin: 8px 0;
-        }
+/* ── SECTION ─────────────────────────────────────── */
+.sec { margin-bottom: 2rem; }
+.sec-title { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); font-weight: 500; margin-bottom: 14px; }
 
-        .label {
-            color: #999999;
-        }
+/* ── METRIC SLIDERS ─────────────────────────────── */
+.mg { display: flex; flex-direction: column; gap: 14px; }
+.mr { display: flex; align-items: center; gap: 14px; }
+.ml { width: 150px; flex-shrink: 0; }
+.ml-name { font-size: 14px; color: var(--t1); }
+.ml-hint { font-size: 11px; color: var(--t3); font-weight: 300; }
+.sw { flex: 1; display: flex; align-items: center; gap: 10px; }
+input[type=range] {
+  flex: 1; height: 2px; -webkit-appearance: none; appearance: none;
+  background: var(--bg3); border-radius: 99px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--t1); border: 3px solid var(--card); box-shadow: 0 0 0 1px var(--bd2); cursor: pointer; }
+input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--t1); border: 3px solid var(--card); cursor: pointer; }
+.mv { font-size: 14px; font-weight: 500; color: var(--t1); min-width: 20px; text-align: right; font-variant-numeric: tabular-nums; }
+.mv.muted { color: var(--t3); font-weight: 300; }
 
-        .value {
-            color: #ffffff;
-        }
+/* ── TIME / NUMBER INPUTS ────────────────────────── */
+.ti { padding: 7px 11px; border: 1px solid var(--bd2); border-radius: var(--rs); background: var(--bg2); color: var(--t1); font-size: 14px; width: 110px; outline: none; transition: border-color .15s; }
+.ti:focus { border-color: var(--t3); }
+.ni { padding: 7px 11px; border: 1px solid var(--bd2); border-radius: var(--rs); background: var(--bg2); color: var(--t1); font-size: 14px; width: 85px; outline: none; transition: border-color .15s; }
+.ni:focus { border-color: var(--t3); }
 
-        .blinking {
-            animation: blink 1s steps(2, start) infinite;
-        }
+/* ── HABITS ──────────────────────────────────────── */
+.hg { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 7px; }
+.ht {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 11px;
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  background: var(--card);
+  color: var(--t2);
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+  transition: all .12s;
+  cursor: pointer;
+}
+.ht:hover { border-color: var(--bd2); color: var(--t1); }
+.ht.on { border-color: var(--t1); background: var(--bg2); color: var(--t1); }
+.ht-box { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid var(--bd2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .12s; }
+.ht.on .ht-box { background: var(--acc); border-color: var(--acc); }
+.ht-ck { display: none; }
+.ht.on .ht-ck { display: block; }
 
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
+/* ── NOTES ───────────────────────────────────────── */
+.nt { width: 100%; min-height: 75px; padding: 10px 12px; border: 1px solid var(--bd); border-radius: var(--r); background: var(--bg2); color: var(--t1); font-size: 14px; resize: vertical; outline: none; font-family: var(--sans); font-weight: 300; line-height: 1.6; transition: border-color .15s; }
+.nt:focus { border-color: var(--bd2); }
+.nt::placeholder { color: var(--t3); }
 
-        button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #444;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
+/* ── SAVE ROW ────────────────────────────────────── */
+.sr { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-top: 1.5rem; border-top: 1px solid var(--bd); margin-top: .5rem; }
+.saved-msg { font-size: 12px; color: var(--ok); margin-right: auto; opacity: 0; transition: opacity .3s; }
+.saved-msg.show { opacity: 1; }
+.btn-p { padding: 8px 20px; background: var(--acc); color: var(--acc-f); border-radius: var(--r); font-size: 13.5px; font-weight: 500; transition: opacity .15s; }
+.btn-p:hover { opacity: .8; }
+.btn-g { padding: 8px 16px; border: 1px solid var(--bd2); border-radius: var(--r); font-size: 13.5px; color: var(--t2); transition: background .1s, color .1s; }
+.btn-g:hover { background: var(--bg2); color: var(--t1); }
+.btn-g:disabled { opacity: .4; cursor: default; }
 
-        button:hover {
-            background-color: #666;
-        }
+/* ── AI RESULT ───────────────────────────────────── */
+.ai-box { margin-top: 1.5rem; border-left: 2px solid var(--bd2); padding-left: 1.25rem; }
+.ai-box-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); margin-bottom: 10px; }
+.ai-box p { font-family: var(--serif); font-size: 16px; line-height: 1.8; color: var(--t2); font-style: italic; }
+.ai-box p + p { margin-top: .75rem; }
 
-        @media screen and (max-width: 768px) {
-            .terminal, .spotify {
-                font-size: 14px;
-                padding: 10px;
-                margin: 15px;
-            }
+/* ── ANALYTICS CARDS ─────────────────────────────── */
+.ag { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 2rem; }
+.ac { background: var(--bg2); border-radius: var(--r); padding: 14px 16px; }
+.ac-label { font-size: 11px; color: var(--t3); letter-spacing: .04em; margin-bottom: 5px; font-weight: 400; }
+.ac-value { font-family: var(--serif); font-size: 28px; font-weight: 400; letter-spacing: -.02em; color: var(--t1); line-height: 1.1; }
+.ac-value.empty { font-family: var(--sans); font-size: 20px; color: var(--t3); font-weight: 300; }
+.ac-sub { font-size: 11px; color: var(--t3); margin-top: 4px; font-weight: 300; }
+.ac-delta { font-size: 11px; margin-top: 5px; font-weight: 400; }
+.delta-up { color: var(--ok); }
+.delta-dn { color: var(--warn); }
+.delta-n  { color: var(--t3); }
 
-            .header img {
-                width: 60px;
-                height: 60px;
-            }
+/* ── CHARTS ──────────────────────────────────────── */
+.cs { margin-bottom: 2rem; }
+.cs-label { font-size: 12px; color: var(--t2); margin-bottom: 8px; }
+.cs-labels { display: flex; justify-content: space-between; margin-top: 5px; }
+.cs-labels span { font-size: 10px; color: var(--t3); flex: 1; text-align: center; }
+.no-data { height: 60px; display: flex; align-items: center; font-size: 12px; color: var(--t3); font-weight: 300; }
 
-            .header h1 {
-                font-size: 18px;
-            }
-        }
+/* ── HABIT TABLE ─────────────────────────────────── */
+.htable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.htable td { padding: 7px 0; border-bottom: 1px solid var(--bd); color: var(--t2); vertical-align: middle; }
+.htable td:first-child { color: var(--t1); font-size: 13.5px; }
+.htable td:last-child { text-align: right; color: var(--t3); font-size: 12px; white-space: nowrap; }
+.hbar-wrap { width: 80px; height: 3px; background: var(--bg3); border-radius: 99px; display: inline-block; vertical-align: middle; margin: 0 10px; }
+.hbar { height: 100%; background: var(--acc); border-radius: 99px; }
 
-        @media screen and (max-width: 480px) {
-            .terminal, .spotify {
-                font-size: 12px;
-                padding: 10px;
-                margin: 10px auto;
-                width: 90%;
-            }
+/* ── MOOD DOTS (30 days) ─────────────────────────── */
+.mood-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-top: 8px; }
+.mood-dot { height: 24px; border-radius: 4px; background: var(--bg3); }
+.legend { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--t3); font-weight: 300; }
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 
-            .header img {
-                width: 50px;
-                height: 50px;
-            }
+/* ── MEDIA ───────────────────────────────────────── */
+.mtabs { display: flex; gap: 3px; margin-bottom: 1.5rem; border-bottom: 1px solid var(--bd); padding-bottom: 1rem; }
+.mtab { padding: 5px 14px; border-radius: var(--rs); font-size: 13.5px; color: var(--t2); transition: all .1s; position: relative; }
+.mtab:hover { background: var(--bg2); color: var(--t1); }
+.mtab.on { background: var(--bg3); color: var(--t1); font-weight: 500; }
+.mtab-count { font-size: 11px; font-weight: 300; color: var(--t3); margin-left: 4px; }
 
-            .header h1 {
-                font-size: 16px;
-            }
-        }
-    </style>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const terminal = document.querySelector(".terminal");
-            const lines = [
-                () => `<span class='label'>C:\\Users\\Tp>TIME</span> <span class='value'>${new Date().toLocaleTimeString()}</span>`,
-                () => `<span class='label'>C:\\Users\\Tp>DATE</span> <span class='value'>${new Date().toLocaleDateString()}</span>`,
-                () => `<span class='label'>C:\\Users\\Tp>DAY</span> <span class='value'>[${new Date().toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase()}]</span>`,
-                () => `<span class='label'>C:\\Users\\Tp>LOG</span> <span class='value'>Nothing is true.</span>`,
-                () => `<span class='label'>C:\\Users\\Tp>20X4</span> <span class='value'>41 72 65 20 79 6F 75 20 6F 6B 61 79 3F</span>`
-            ];
+.mlist { display: flex; flex-direction: column; gap: 5px; }
+.mi {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 13px;
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  background: var(--card);
+  transition: border-color .12s;
+}
+.mi:hover { border-color: var(--bd2); }
+.sdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sdot.s-active    { background: var(--ok); }
+.sdot.s-completed { background: var(--acc); }
+.sdot.s-paused    { background: var(--t3); }
+.sdot.s-wishlist  { background: var(--bg3); border: 1px solid var(--bd2); }
+.mi-info { flex: 1; min-width: 0; }
+.mi-title { font-size: 14px; font-weight: 500; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mi-meta { font-size: 11.5px; color: var(--t3); font-weight: 300; margin-top: 1px; }
+.mi-rating { font-size: 13px; color: var(--t2); flex-shrink: 0; font-weight: 400; }
+.mi-del { width: 24px; height: 24px; border-radius: 5px; color: var(--t3); font-size: 17px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .1s, color .1s; line-height: 1; }
+.mi-del:hover { background: var(--bg3); color: var(--t1); }
+.add-btn { display: flex; align-items: center; gap: 7px; padding: 9px 13px; border: 1px dashed var(--bd2); border-radius: var(--r); color: var(--t3); font-size: 13px; font-weight: 400; width: 100%; margin-top: 6px; transition: all .12s; }
+.add-btn:hover { border-color: var(--t3); color: var(--t2); background: var(--bg2); }
 
-            let delay = 0;
+/* ── MODAL ───────────────────────────────────────── */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.modal.hide { display: none; }
+.mbox { background: var(--bg); border: 1px solid var(--bd2); border-radius: var(--r); padding: 1.5rem; width: 100%; max-width: 410px; }
+.mbox-title { font-family: var(--serif); font-size: 20px; font-weight: 400; margin-bottom: 1.25rem; color: var(--t1); }
+.mf { margin-bottom: 11px; }
+.mf-label { font-size: 11.5px; color: var(--t2); margin-bottom: 4px; font-weight: 400; }
+.mi-form { width: 100%; padding: 8px 11px; border: 1px solid var(--bd2); border-radius: var(--rs); background: var(--bg2); color: var(--t1); font-size: 14px; outline: none; transition: border-color .15s; }
+.mi-form:focus { border-color: var(--t3); }
+.mactions { display: flex; gap: 8px; margin-top: 1.25rem; justify-content: flex-end; }
 
-            lines.forEach((lineGenerator, index) => {
-                setTimeout(() => {
-                    const newLine = document.createElement("div");
-                    newLine.className = "line";
-                    newLine.innerHTML = lineGenerator();
-                    terminal.appendChild(newLine);
-
-                    if (index === lines.length - 1) {
-                        const cursor = document.createElement("span");
-                        cursor.className = "blinking";
-                        cursor.textContent = "|";
-                        terminal.appendChild(cursor);
-                    }
-                }, delay);
-
-                delay += 900; // Slightly slower delay (600ms per line)
-            });
-        });
-    </script>
+/* ── MOBILE NAV ──────────────────────────────────── */
+#bn { display: none; }
+@media (max-width: 680px) {
+  #sb { display: none; }
+  #main { margin-left: 0; padding-bottom: var(--nh); }
+  .view { padding: 1.25rem 1rem 1rem; }
+  .ml { width: 100px; }
+  .ml-hint { display: none; }
+  .ag { grid-template-columns: 1fr 1fr; }
+  .ph-title { font-size: 22px; }
+  #bn {
+    display: flex;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: var(--nh);
+    background: var(--bg);
+    border-top: 1px solid var(--bd);
+    z-index: 20;
+  }
+  .bbn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--t3); font-size: 10px; font-weight: 400; letter-spacing: .03em; padding: 8px 0; transition: color .1s; }
+  .bbn.on { color: var(--t1); }
+  .bbn svg { opacity: .6; }
+  .bbn.on svg { opacity: 1; }
+}
+@media (min-width: 681px) and (max-width: 900px) {
+  :root { --sw: 180px; }
+  .view { padding: 1.5rem 1.75rem; }
+}
+</style>
 </head>
 <body>
-    <div class="header">
-        <img src="https://tp-ss.github.io/PFP2024+.jpg" alt="Logo">
-        <h1>Tp</h1>
+
+<!-- ── SIDEBAR ──────────────────────────────────── -->
+<aside id="sb">
+  <div class="sb-logo">Hub<span>personal</span></div>
+  <nav style="display:flex;flex-direction:column;gap:2px">
+    <div class="sb-section">Diario</div>
+    <button class="nb on" data-v="hoy">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7.5" cy="7.5" r="5.5"/><circle cx="7.5" cy="7.5" r="2" fill="currentColor" stroke="none"/></svg>
+      Hoy
+    </button>
+    <button class="nb" data-v="semana">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="1.5,11 4.5,7 7.5,8.5 10.5,4 13.5,6"/></svg>
+      Esta semana
+    </button>
+    <button class="nb" data-v="mes">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="12" height="10" rx="1.5"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="1.5" y1="6.5" x2="13.5" y2="6.5"/></svg>
+      Este mes
+    </button>
+    <div class="sb-section" style="margin-top:.75rem">Media</div>
+    <button class="nb" data-v="media">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="3,1.5 12,7.5 3,13.5" fill="currentColor" stroke="none"/></svg>
+      Media
+    </button>
+  </nav>
+  <div class="sb-bottom">
+    <button class="settings-btn" id="settings-btn">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="2"/><path d="M7,1v2M7,11v2M1,7h2M11,7h2M2.9,2.9l1.4,1.4M9.7,9.7l1.4,1.4M2.9,11.1l1.4-1.4M9.7,4.3l1.4-1.4"/></svg>
+      Ajustes (API Key IA)
+    </button>
+  </div>
+</aside>
+
+<!-- ── MAIN ─────────────────────────────────────── -->
+<main id="main">
+  <div id="v-hoy"    class="view on"></div>
+  <div id="v-semana" class="view"></div>
+  <div id="v-mes"    class="view"></div>
+  <div id="v-media"  class="view"></div>
+</main>
+
+<!-- ── MOBILE NAV ──────────────────────────────── -->
+<nav id="bn">
+  <button class="bbn on" data-v="hoy">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2.5" fill="currentColor" stroke="none"/></svg>
+    Hoy
+  </button>
+  <button class="bbn" data-v="semana">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,15 6,9 10,11 14,5 18,8"/></svg>
+    Semana
+  </button>
+  <button class="bbn" data-v="mes">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="16" height="14" rx="2"/><line x1="6" y1="1" x2="6" y2="5.5"/><line x1="14" y1="1" x2="14" y2="5.5"/><line x1="2" y1="9" x2="18" y2="9"/></svg>
+    Mes
+  </button>
+  <button class="bbn" data-v="media">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><polygon points="4,2 16,10 4,18" fill="currentColor"/></svg>
+    Media
+  </button>
+</nav>
+
+<!-- ── MODAL ────────────────────────────────────── -->
+<div id="modal" class="modal hide"></div>
+
+<script>
+// ─── STORAGE ──────────────────────────────────────
+const db = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set: (k,v) => localStorage.setItem(k, JSON.stringify(v)),
+};
+
+// ─── DATE ─────────────────────────────────────────
+const DAYS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MONS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const MONS_S = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+function today(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
+function dk(d){ return d.toISOString().slice(0,10); }
+function addD(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function isToday(d){ return dk(d)===dk(today()); }
+function fmtFull(d){ return `${DAYS[d.getDay()]}, ${d.getDate()} de ${MONS[d.getMonth()]} de ${d.getFullYear()}`; }
+function fmtShort(d){ return `${d.getDate()} ${MONS_S[d.getMonth()]}`; }
+
+// ─── DATA MODELS ──────────────────────────────────
+const HABITS = [
+  {id:'ejercicio', label:'Ejercicio'},
+  {id:'proteina',  label:'Proteína'},
+  {id:'agua',      label:'Agua'},
+  {id:'sinprocesados', label:'Sin ultraprocesados'},
+  {id:'social',    label:'Socialización'},
+  {id:'redes',     label:'Redes <30 min'},
+  {id:'creativo',  label:'Tiempo creativo'},
+  {id:'airelibre', label:'Aire libre'},
+];
+
+const MEDIA_DEF = {
+  games: {
+    label:'Juegos', sing:'juego',
+    statuses:['Jugando','Completado','En pausa','Pendiente'],
+    fields:[
+      {id:'title',    label:'Título *',     type:'text', req:true},
+      {id:'platform', label:'Plataforma',   type:'select', opts:['PC','PS5','PS4','Switch','Xbox','Mobile','Otro']},
+      {id:'status',   label:'Estado',       type:'select', opts:['Jugando','Completado','En pausa','Pendiente']},
+      {id:'rating',   label:'Nota /10',     type:'number', min:1, max:10},
+      {id:'notes',    label:'Notas',        type:'text'},
+    ]
+  },
+  series: {
+    label:'Series', sing:'serie',
+    statuses:['Viendo','Completada','En pausa','Pendiente'],
+    fields:[
+      {id:'title',    label:'Título *',     type:'text', req:true},
+      {id:'platform', label:'Plataforma',   type:'select', opts:['Netflix','HBO','Disney+','Prime','Apple TV+','Otro']},
+      {id:'progress', label:'Temporada / Ep', type:'text', ph:'ej. T2 E05'},
+      {id:'status',   label:'Estado',       type:'select', opts:['Viendo','Completada','En pausa','Pendiente']},
+      {id:'rating',   label:'Nota /10',     type:'number', min:1, max:10},
+    ]
+  },
+  books: {
+    label:'Libros', sing:'libro',
+    statuses:['Leyendo','Completado','En pausa','Pendiente'],
+    fields:[
+      {id:'title',    label:'Título *',     type:'text', req:true},
+      {id:'author',   label:'Autor',        type:'text'},
+      {id:'progress', label:'Progreso (%)', type:'number', min:0, max:100},
+      {id:'status',   label:'Estado',       type:'select', opts:['Leyendo','Completado','En pausa','Pendiente']},
+      {id:'rating',   label:'Nota /10',     type:'number', min:1, max:10},
+    ]
+  },
+  movies: {
+    label:'Películas', sing:'película',
+    statuses:['Vista','Pendiente'],
+    fields:[
+      {id:'title',  label:'Título *',  type:'text', req:true},
+      {id:'year',   label:'Año',       type:'number', min:1900, max:2030},
+      {id:'status', label:'Estado',    type:'select', opts:['Vista','Pendiente']},
+      {id:'rating', label:'Nota /10',  type:'number', min:1, max:10},
+      {id:'notes',  label:'Notas',     type:'text'},
+    ]
+  }
+};
+
+const STATUS_CLASS = {
+  'Jugando':'s-active','Viendo':'s-active','Leyendo':'s-active',
+  'Completado':'s-completed','Completada':'s-completed','Vista':'s-completed',
+  'En pausa':'s-paused',
+  'Pendiente':'s-wishlist'
+};
+
+// ─── DAY DATA ─────────────────────────────────────
+function getDay(d){ return db.get('d:'+dk(d)); }
+function saveDay(d,data){ db.set('d:'+dk(d),data); }
+const DEFAULT_DAY = () => ({ mood:null,energy:null,anxiety:null,sleepH:null,sleepQ:null,wakeTime:'',habits:{},notes:'' });
+
+// ─── MEDIA DATA ───────────────────────────────────
+function getMedia(){ return db.get('media') || {games:[],series:[],books:[],movies:[]}; }
+function saveMedia(m){ db.set('media',m); }
+
+// ─── APP STATE ────────────────────────────────────
+let view = 'hoy';
+let curDate = today();
+let mediaTab = 'games';
+
+// ─── NAVIGATION ───────────────────────────────────
+function nav(v){
+  view = v;
+  document.querySelectorAll('.nb,.bbn').forEach(b => b.classList.toggle('on', b.dataset.v===v));
+  document.querySelectorAll('.view').forEach(el => el.classList.toggle('on', el.id==='v-'+v));
+  if(v==='hoy')    renderHoy();
+  if(v==='semana') renderSemana();
+  if(v==='mes')    renderMes();
+  if(v==='media')  renderMedia();
+}
+
+document.querySelectorAll('.nb,.bbn').forEach(b => b.addEventListener('click', ()=>nav(b.dataset.v)));
+
+// ─── SLIDER HELPER ────────────────────────────────
+function initSlider(id, field, dayData, autoSave){
+  const sl = document.getElementById('sl-'+id);
+  const vl = document.getElementById('vl-'+id);
+  if(!sl||!vl) return;
+  let touched = dayData[field] !== null;
+  if(touched){ sl.value = dayData[field]; vl.textContent = dayData[field]; vl.classList.remove('muted'); }
+  else { sl.value = 5; vl.textContent = '—'; vl.classList.add('muted'); }
+  const activate = () => { touched=true; vl.textContent=sl.value; vl.classList.remove('muted'); };
+  sl.addEventListener('mousedown', activate);
+  sl.addEventListener('touchstart', activate);
+  sl.addEventListener('input', () => { if(touched){ vl.textContent=sl.value; } if(autoSave) triggerAutosave(); });
+}
+
+// ─── AUTOSAVE ─────────────────────────────────────
+let saveTimer;
+function triggerAutosave(){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>{ if(view==='hoy') doSave(false); },1200); }
+
+function collectDay(){
+  const el = document.getElementById('v-hoy');
+  if(!el) return DEFAULT_DAY();
+  const mv = id => { const v=document.getElementById('vl-'+id)?.textContent; return (v&&v!=='—')?parseInt(v):null; };
+  const habits={};
+  el.querySelectorAll('.ht').forEach(b=>{ habits[b.dataset.hid]=b.classList.contains('on'); });
+  return {
+    mood:mv('mood'), energy:mv('energy'), anxiety:mv('anxiety'),
+    sleepH: parseFloat(document.getElementById('inp-sleepH')?.value)||null,
+    sleepQ: mv('sleepQ'),
+    wakeTime: document.getElementById('inp-wake')?.value||'',
+    habits, notes: document.getElementById('inp-notes')?.value||''
+  };
+}
+
+function doSave(showBadge=true){
+  saveDay(curDate, collectDay());
+  if(showBadge){
+    const msg=document.getElementById('saved-msg');
+    if(msg){ msg.classList.add('show'); setTimeout(()=>msg.classList.remove('show'),2000); }
+  }
+}
+
+// ─── RENDER HOY ───────────────────────────────────
+function renderHoy(){
+  const el = document.getElementById('v-hoy');
+  const d = getDay(curDate) || DEFAULT_DAY();
+  const isTod = isToday(curDate);
+
+  el.innerHTML = `
+<div class="ph">
+  <div class="ph-left">
+    <div class="ph-title">${isTod ? 'Hoy' : fmtFull(curDate)}</div>
+    ${isTod ? `<div class="ph-sub">${fmtFull(curDate)}</div>` : ''}
+  </div>
+  <div class="dn" style="margin-top:6px">
+    <button class="dn-btn" id="btn-prev">←</button>
+    ${!isTod?`<button class="dn-today" id="btn-today">hoy</button>`:''}
+    <button class="dn-btn" id="btn-next"${isTod?' disabled style="opacity:.3;cursor:default"':''}>→</button>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">Bienestar</div>
+  <div class="mg">
+    <div class="mr">
+      <div class="ml"><div class="ml-name">Estado de ánimo</div><div class="ml-hint">¿cómo te sientes?</div></div>
+      <div class="sw"><input type="range" min="1" max="10" step="1" id="sl-mood"><div class="mv muted" id="vl-mood">—</div></div>
     </div>
-    <div class="terminal"></div>
-    <div class="terminal">
-        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/5Kb0NPgMvWJmwufHU1q0Tf?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        <button onclick="window.open('https://open.spotify.com/playlist/5Kb0NPgMvWJmwufHU1q0Tf?si=6adef6f0d6a940b7', '_blank')">2024 - Listen On Spotify</button>
+    <div class="mr">
+      <div class="ml"><div class="ml-name">Energía</div><div class="ml-hint">vitalidad física y mental</div></div>
+      <div class="sw"><input type="range" min="1" max="10" step="1" id="sl-energy"><div class="mv muted" id="vl-energy">—</div></div>
     </div>
+    <div class="mr">
+      <div class="ml"><div class="ml-name">Calma</div><div class="ml-hint">10 = muy tranquilo</div></div>
+      <div class="sw"><input type="range" min="1" max="10" step="1" id="sl-anxiety"><div class="mv muted" id="vl-anxiety">—</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">Sueño</div>
+  <div class="mg">
+    <div class="mr">
+      <div class="ml"><div class="ml-name">Hora de despertar</div><div class="ml-hint">ritmo circadiano</div></div>
+      <input type="time" class="ti" id="inp-wake" value="${d.wakeTime||''}">
+    </div>
+    <div class="mr">
+      <div class="ml"><div class="ml-name">Horas dormido</div><div class="ml-hint">óptimo: 7–9h</div></div>
+      <input type="number" class="ni" id="inp-sleepH" min="0" max="14" step="0.5" placeholder="7.5" value="${d.sleepH||''}">
+    </div>
+    <div class="mr">
+      <div class="ml"><div class="ml-name">Calidad del sueño</div><div class="ml-hint">¿cómo has dormido?</div></div>
+      <div class="sw"><input type="range" min="1" max="10" step="1" id="sl-sleepQ"><div class="mv muted" id="vl-sleepQ">—</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">Hábitos</div>
+  <div class="hg">
+    ${HABITS.map(h=>`
+      <button class="ht${d.habits[h.id]?' on':''}" data-hid="${h.id}">
+        <div class="ht-box">
+          <svg class="ht-ck" width="9" height="7" viewBox="0 0 9 7" fill="none"><polyline points="1,3.5 3.5,6 8,1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        ${h.label}
+      </button>
+    `).join('')}
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">Notas del día</div>
+  <textarea class="nt" id="inp-notes" placeholder="Algo que destacar...">${d.notes||''}</textarea>
+</div>
+
+<div class="sr">
+  <div class="saved-msg" id="saved-msg">Guardado</div>
+  <button class="btn-g" id="btn-ai" style="font-size:13px">Analizar con IA</button>
+  <button class="btn-p" id="btn-save">Guardar</button>
+</div>
+
+<div id="ai-result" style="display:none" class="ai-box">
+  <div class="ai-box-label">Análisis del día</div>
+  <div id="ai-text"></div>
+</div>
+`;
+
+  initSlider('mood',    'mood',    d, true);
+  initSlider('energy',  'energy',  d, true);
+  initSlider('anxiety', 'anxiety', d, true);
+  initSlider('sleepQ',  'sleepQ',  d, true);
+
+  el.querySelectorAll('.ht').forEach(b=>{
+    b.addEventListener('click',()=>{ b.classList.toggle('on'); triggerAutosave(); });
+  });
+  el.querySelector('#inp-wake').addEventListener('change', triggerAutosave);
+  el.querySelector('#inp-sleepH').addEventListener('change', triggerAutosave);
+  el.querySelector('#inp-notes').addEventListener('blur', triggerAutosave);
+
+  el.querySelector('#btn-save').onclick = ()=>doSave(true);
+  el.querySelector('#btn-prev').onclick = ()=>{ curDate=addD(curDate,-1); renderHoy(); };
+  const nb=el.querySelector('#btn-next'); if(nb) nb.onclick=()=>{ curDate=addD(curDate,1); renderHoy(); };
+  const tb=el.querySelector('#btn-today'); if(tb) tb.onclick=()=>{ curDate=today(); renderHoy(); };
+  el.querySelector('#btn-ai').onclick = analyzeDay;
+}
+
+// ─── AI ANALYSIS ──────────────────────────────────
+async function analyzeDay(){
+  const apiKey = db.get('api_key') || '';
+  if(!apiKey){ openSettings('Necesitas añadir tu API key de Anthropic para usar el análisis con IA.'); return; }
+  doSave(false);
+  const d = collectDay();
+  const result = document.getElementById('ai-result');
+  const textEl = document.getElementById('ai-text');
+  result.style.display='block';
+  textEl.innerHTML = '<p style="color:var(--t3);font-style:normal;font-size:13px">Analizando…</p>';
+  document.getElementById('btn-ai').disabled = true;
+
+  const lines = HABITS.map(h=>`${d.habits[h.id]?'✓':'✗'} ${h.label}`).join('\n');
+  const prompt = `Eres un coach de bienestar directo, empático y sin condescendencia. Analiza este registro y da un comentario honesto, específico y útil, como un amigo inteligente.
+
+Fecha: ${fmtFull(curDate)}
+Ánimo: ${d.mood??'—'}/10 · Energía: ${d.energy??'—'}/10 · Calma: ${d.anxiety??'—'}/10
+Hora despertar: ${d.wakeTime||'—'} · Horas dormido: ${d.sleepH??'—'} · Calidad sueño: ${d.sleepQ??'—'}/10
+Hábitos:
+${lines}
+Notas: ${d.notes||'(ninguna)'}
+
+Instrucciones: 2-3 párrafos, tono directo y cálido. Busca conexiones entre métricas (si duerme poco y tiene poca energía, conéctalo). Sé específico con los datos. Una sugerencia concreta para mañana. Sin listas ni emojis. Máximo 150 palabras en español.`;
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'x-api-key': apiKey, 'anthropic-version':'2023-06-01' },
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:400, messages:[{role:'user',content:prompt}] })
+    });
+    const data = await res.json();
+    if(data.error){ textEl.innerHTML=`<p style="color:var(--warn);font-style:normal;font-size:13px">Error: ${data.error.message}</p>`; }
+    else {
+      const text = data.content?.[0]?.text || '';
+      textEl.innerHTML = text.split('\n\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+    }
+  } catch(e){
+    textEl.innerHTML='<p style="color:var(--warn);font-style:normal;font-size:13px">Error de conexión. Revisa tu API key.</p>';
+  }
+  document.getElementById('btn-ai').disabled = false;
+}
+
+// ─── ANALYTICS UTILS ──────────────────────────────
+function getLast(n){ const r=[]; for(let i=n-1;i>=0;i--){ const d=addD(today(),-i); r.push({date:d,data:getDay(d)||DEFAULT_DAY()}); } return r; }
+function avg(arr){ const v=arr.filter(x=>x!==null&&x!==undefined); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; }
+
+function lineChart(values, opts={}){
+  const {w=500,h=65,color='var(--t1)'}=opts;
+  const valid=values.filter(v=>v!==null);
+  if(valid.length<2) return `<div class="no-data">Sin datos suficientes</div>`;
+  const mn=Math.min(...valid), mx=Math.max(...valid), rng=mx-mn||1;
+  const px=10, py=8, cw=w-px*2, ch=h-py*2;
+  const pts=values.map((v,i)=>v===null?null:{
+    x: px+(i/(values.length-1))*cw,
+    y: py+ch-((v-mn)/rng)*ch, v
+  });
+  let path='';
+  pts.forEach((p,i)=>{ if(!p)return; const prev=pts.slice(0,i).reverse().find(Boolean); path+= prev?` L${p.x},${p.y}`:`M${p.x},${p.y}`; });
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none">
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${pts.filter(Boolean).map(p=>`<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="${color}"/>`).join('')}
+  </svg>`;
+}
+
+function delta(cur, prev, unit=''){
+  if(cur===null||prev===null) return '';
+  const d=cur-prev;
+  if(Math.abs(d)<0.15) return `<div class="ac-delta delta-n">Sin cambios</div>`;
+  return d>0
+    ? `<div class="ac-delta delta-up">↑ +${d.toFixed(1)}${unit} vs anterior</div>`
+    : `<div class="ac-delta delta-dn">↓ ${d.toFixed(1)}${unit} vs anterior</div>`;
+}
+
+// ─── RENDER SEMANA ────────────────────────────────
+function renderSemana(){
+  const el=document.getElementById('v-semana');
+  const days=getLast(7);
+  const prev=getLast(14).slice(0,7);
+  const moods=days.map(d=>d.data.mood);
+  const energies=days.map(d=>d.data.energy);
+  const sleeps=days.map(d=>d.data.sleepH);
+  const aM=avg(moods), aE=avg(energies), aS=avg(sleeps), aQ=avg(days.map(d=>d.data.sleepQ));
+  const pM=avg(prev.map(d=>d.data.mood)), pS=avg(prev.map(d=>d.data.sleepH));
+  const labels=days.map(d=>DAYS[d.date.getDay()].slice(0,3));
+  const habitStats=HABITS.map(h=>({ label:h.label, done:days.filter(d=>d.data.habits[h.id]).length }));
+
+  el.innerHTML=`
+<div class="ph">
+  <div class="ph-left">
+    <div class="ph-title">Esta semana</div>
+    <div class="ph-sub">${fmtShort(days[0].date)} – ${fmtShort(days[6].date)}</div>
+  </div>
+</div>
+
+<div class="ag">
+  <div class="ac"><div class="ac-label">Ánimo medio</div><div class="ac-value ${aM===null?'empty':''}">${aM!==null?aM.toFixed(1):'—'}</div>${delta(aM,pM)}</div>
+  <div class="ac"><div class="ac-label">Energía media</div><div class="ac-value ${aE===null?'empty':''}">${aE!==null?aE.toFixed(1):'—'}</div><div class="ac-sub">de 10</div></div>
+  <div class="ac"><div class="ac-label">Sueño medio</div><div class="ac-value ${aS===null?'empty':''}">${aS!==null?aS.toFixed(1)+'h':'—'}</div>${delta(aS,pS,'h')}${aS!==null?`<div class="ac-sub">${aS>=7?'Óptimo':'Por debajo del óptimo'}</div>`:''}</div>
+  <div class="ac"><div class="ac-label">Calidad sueño</div><div class="ac-value ${aQ===null?'empty':''}">${aQ!==null?aQ.toFixed(1):'—'}</div><div class="ac-sub">de 10</div></div>
+</div>
+
+<div class="cs">
+  <div class="cs-label">Estado de ánimo — 7 días</div>
+  ${lineChart(moods,{color:'var(--t1)'})}
+  <div class="cs-labels">${labels.map(l=>`<span>${l}</span>`).join('')}</div>
+</div>
+
+<div class="cs">
+  <div class="cs-label">Sueño — horas por noche</div>
+  ${lineChart(sleeps,{color:'var(--t2)'})}
+  <div class="cs-labels">${labels.map(l=>`<span>${l}</span>`).join('')}</div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">Adherencia a hábitos</div>
+  <table class="htable">
+    ${habitStats.map(h=>`
+    <tr>
+      <td>${h.label}</td>
+      <td><div class="hbar-wrap"><div class="hbar" style="width:${Math.round(h.done/7*100)}%"></div></div></td>
+      <td>${h.done}/7 días</td>
+    </tr>`).join('')}
+  </table>
+</div>`;
+}
+
+// ─── RENDER MES ───────────────────────────────────
+function renderMes(){
+  const el=document.getElementById('v-mes');
+  const days=getLast(30);
+  const prev=getLast(60).slice(0,30);
+  const moods=days.map(d=>d.data.mood);
+  const aM=avg(moods), aE=avg(days.map(d=>d.data.energy)), aS=avg(days.map(d=>d.data.sleepH));
+  const pM=avg(prev.map(d=>d.data.mood)), pS=avg(prev.map(d=>d.data.sleepH));
+  const recorded=days.filter(d=>d.data.mood!==null).length;
+  const habitStats=HABITS.map(h=>({label:h.label,done:days.filter(d=>d.data.habits[h.id]).length}));
+
+  const daysWithMood=days.filter(d=>d.data.mood!==null);
+  const bestDay=daysWithMood.length?daysWithMood.reduce((a,b)=>b.data.mood>a.data.mood?b:a):null;
+  const worstDay=daysWithMood.length>1?daysWithMood.reduce((a,b)=>b.data.mood<a.data.mood?b:a):null;
+
+  function moodColor(v){
+    if(v===null) return 'var(--bg3)';
+    if(v>=8) return 'var(--ok)';
+    if(v>=6) return 'color-mix(in srgb, var(--ok) 40%, var(--t3))';
+    if(v>=4) return 'var(--t3)';
+    return 'var(--warn)';
+  }
+  function moodOpacity(v){ if(v===null) return '1'; return (0.25+(v/10)*0.75).toFixed(2); }
+
+  el.innerHTML=`
+<div class="ph">
+  <div class="ph-left">
+    <div class="ph-title">Este mes</div>
+    <div class="ph-sub">${fmtShort(days[0].date)} – ${fmtShort(days[29].date)}</div>
+  </div>
+</div>
+
+<div class="ag">
+  <div class="ac"><div class="ac-label">Ánimo medio</div><div class="ac-value ${aM===null?'empty':''}">${aM!==null?aM.toFixed(1):'—'}</div>${delta(aM,pM)}</div>
+  <div class="ac"><div class="ac-label">Energía media</div><div class="ac-value ${aE===null?'empty':''}">${aE!==null?aE.toFixed(1):'—'}</div></div>
+  <div class="ac"><div class="ac-label">Sueño medio</div><div class="ac-value ${aS===null?'empty':''}">${aS!==null?aS.toFixed(1)+'h':'—'}</div>${delta(aS,pS,'h')}</div>
+  <div class="ac"><div class="ac-label">Días registrados</div><div class="ac-value">${recorded}</div><div class="ac-sub">de 30</div></div>
+</div>
+
+<div class="cs">
+  <div class="cs-label">Ánimo — mapa de los últimos 30 días <span style="font-size:11px;color:var(--t3)">(cada cuadro = un día)</span></div>
+  <div class="mood-grid">
+    ${days.map(d=>`<div class="mood-dot" title="${fmtShort(d.date)}${d.data.mood!==null?' · '+d.data.mood+'/10':''}" style="background:${moodColor(d.data.mood)};opacity:${moodOpacity(d.data.mood)}"></div>`).join('')}
+  </div>
+  <div class="legend" style="margin-top:12px">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--ok)"></div>8–10 excelente</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--t2)"></div>6–7 bueno</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--t3)"></div>4–5 regular</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--warn)"></div>&lt;4 difícil</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--bg3);border:1px solid var(--bd2)"></div>Sin registro</div>
+  </div>
+</div>
+
+<div class="cs">
+  <div class="cs-label">Tendencia de ánimo — 30 días</div>
+  ${lineChart(moods,{h:75,color:'var(--t1)'})}
+</div>
+
+${(bestDay||worstDay)?`
+<div class="sec">
+  <div class="sec-title">Días destacados</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    ${bestDay?`<div class="ac"><div class="ac-label">Mejor día</div><div class="ac-value">${bestDay.data.mood}</div><div class="ac-sub">${fmtFull(bestDay.date).split(',')[0]+', '+fmtShort(bestDay.date)}</div></div>`:''}
+    ${worstDay&&worstDay!==bestDay?`<div class="ac"><div class="ac-label">Día más difícil</div><div class="ac-value">${worstDay.data.mood}</div><div class="ac-sub">${fmtFull(worstDay.date).split(',')[0]+', '+fmtShort(worstDay.date)}</div></div>`:''}
+  </div>
+</div>`:''}
+
+<div class="sec">
+  <div class="sec-title">Adherencia a hábitos — 30 días</div>
+  <table class="htable">
+    ${habitStats.map(h=>`
+    <tr>
+      <td>${h.label}</td>
+      <td><div class="hbar-wrap" style="width:90px"><div class="hbar" style="width:${Math.round(h.done/30*100)}%"></div></div></td>
+      <td>${h.done}/30 · ${Math.round(h.done/30*100)}%</td>
+    </tr>`).join('')}
+  </table>
+</div>`;
+}
+
+// ─── RENDER MEDIA ─────────────────────────────────
+function renderMedia(){
+  const el=document.getElementById('v-media');
+  const media=getMedia();
+  const def=MEDIA_DEF[mediaTab];
+  const items=media[mediaTab]||[];
+
+  const activeCount = t => (media[t]||[]).filter(i=>['Jugando','Viendo','Leyendo'].includes(i.status)).length;
+
+  el.innerHTML=`
+<div class="ph">
+  <div class="ph-left"><div class="ph-title">Media</div></div>
+</div>
+
+<div class="mtabs">
+  ${Object.entries(MEDIA_DEF).map(([k,v])=>`
+    <button class="mtab${mediaTab===k?' on':''}" data-tab="${k}">
+      ${v.label}<span class="mtab-count">${activeCount(k)||''}</span>
+    </button>
+  `).join('')}
+</div>
+
+<div class="mlist">
+  ${items.length===0?`<div style="font-size:14px;color:var(--t3);font-weight:300;padding:.5rem 0">Nada aquí todavía.</div>`:''}
+  ${items.map((item,idx)=>`
+    <div class="mi">
+      <div class="sdot ${STATUS_CLASS[item.status]||'s-wishlist'}"></div>
+      <div class="mi-info">
+        <div class="mi-title">${item.title}</div>
+        <div class="mi-meta">${[item.platform,item.author,item.progress?(mediaTab==='books'?item.progress+'%':item.progress):null,item.status].filter(Boolean).join(' · ')}</div>
+      </div>
+      ${item.rating?`<div class="mi-rating">${item.rating}/10</div>`:''}
+      <button class="mi-del" data-idx="${idx}">×</button>
+    </div>
+  `).join('')}
+  <button class="add-btn" id="btn-add">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="6.5" y1="1" x2="6.5" y2="12"/><line x1="1" y1="6.5" x2="12" y2="6.5"/></svg>
+    Añadir ${def.sing}
+  </button>
+</div>`;
+
+  el.querySelectorAll('.mtab').forEach(t=>{ t.onclick=()=>{ mediaTab=t.dataset.tab; renderMedia(); }; });
+  el.querySelectorAll('.mi-del').forEach(b=>{
+    b.onclick=()=>{ const m=getMedia(); m[mediaTab].splice(parseInt(b.dataset.idx),1); saveMedia(m); renderMedia(); };
+  });
+  el.querySelector('#btn-add').onclick=()=>openAddModal(mediaTab);
+}
+
+function openAddModal(type){
+  const def=MEDIA_DEF[type];
+  const modal=document.getElementById('modal');
+  modal.classList.remove('hide');
+  modal.innerHTML=`<div class="mbox">
+    <div class="mbox-title">Añadir ${def.sing}</div>
+    ${def.fields.map(f=>`
+      <div class="mf">
+        <div class="mf-label">${f.label}</div>
+        ${f.type==='select'
+          ?`<select class="mi-form" id="mf-${f.id}"><option value="">—</option>${f.opts.map(o=>`<option>${o}</option>`).join('')}</select>`
+          :`<input class="mi-form" type="${f.type||'text'}" id="mf-${f.id}" placeholder="${f.ph||''}"${f.min!==undefined?' min='+f.min:''}${f.max!==undefined?' max='+f.max:''}>`
+        }
+      </div>
+    `).join('')}
+    <div class="mactions">
+      <button class="btn-g" id="m-cancel">Cancelar</button>
+      <button class="btn-p" id="m-save">Añadir</button>
+    </div>
+  </div>`;
+
+  modal.querySelector('#m-cancel').onclick=()=>modal.classList.add('hide');
+  modal.onclick=e=>{ if(e.target===modal) modal.classList.add('hide'); };
+  modal.querySelector('#m-save').onclick=()=>{
+    const title=document.getElementById('mf-title')?.value.trim();
+    if(!title) return;
+    const item={id:Date.now()};
+    def.fields.forEach(f=>{ const e=document.getElementById('mf-'+f.id); if(e) item[f.id]=f.type==='number'?(parseFloat(e.value)||null):e.value||null; });
+    if(!item.status) item.status=def.fields.find(f=>f.id==='status')?.opts?.[0]||'';
+    const m=getMedia(); m[type].unshift(item); saveMedia(m);
+    modal.classList.add('hide');
+    renderMedia();
+  };
+}
+
+// ─── SETTINGS ─────────────────────────────────────
+function openSettings(msg=''){
+  const modal=document.getElementById('modal');
+  modal.classList.remove('hide');
+  const cur=db.get('api_key')||'';
+  modal.innerHTML=`<div class="mbox">
+    <div class="mbox-title">API Key de Anthropic</div>
+    ${msg?`<p style="font-size:13px;color:var(--warn);margin-bottom:12px">${msg}</p>`:''}
+    <p style="font-size:13px;color:var(--t2);margin-bottom:14px;font-weight:300;line-height:1.6">Para usar el análisis con IA necesitas tu propia API key de Anthropic. Se guarda solo en tu navegador (localStorage), nunca se envía a terceros.</p>
+    <div class="mf">
+      <div class="mf-label">API Key (sk-ant-...)</div>
+      <input class="mi-form" type="password" id="key-inp" value="${cur}" placeholder="sk-ant-api03-...">
+    </div>
+    <div class="mactions">
+      <button class="btn-g" id="s-cancel">Cancelar</button>
+      <button class="btn-p" id="s-save">Guardar</button>
+    </div>
+  </div>`;
+  modal.querySelector('#s-cancel').onclick=()=>modal.classList.add('hide');
+  modal.onclick=e=>{ if(e.target===modal) modal.classList.add('hide'); };
+  modal.querySelector('#s-save').onclick=()=>{ db.set('api_key', document.getElementById('key-inp').value.trim()); modal.classList.add('hide'); };
+}
+document.getElementById('settings-btn').onclick=()=>openSettings();
+
+// ─── INIT ─────────────────────────────────────────
+renderHoy();
+</script>
 </body>
 </html>
