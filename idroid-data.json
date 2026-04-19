@@ -17,7 +17,7 @@
         "lun_ate": true,
         "lun_prot": true,
         "lun_veg": false,
-        "lun_carb": false,
+        "lun_carb": true,
         "din_ate": true,
         "din_prot": true,
         "din_veg": false,
