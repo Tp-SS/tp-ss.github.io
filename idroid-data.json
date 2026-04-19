@@ -2,7 +2,7 @@
   "days": {
     "2026-04-18": {
       "mood": null,
-      "energy": null,
+      "energy": 8,
       "anxiety": null,
       "mental_clarity": null,
       "introspection": null,
