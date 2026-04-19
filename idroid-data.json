@@ -19,7 +19,7 @@
         "lun_veg": false,
         "lun_carb": false,
         "din_ate": true,
-        "din_prot": false,
+        "din_prot": true,
         "din_veg": false,
         "din_carb": false,
         "fruit_today": false,
