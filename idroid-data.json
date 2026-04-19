@@ -7,7 +7,7 @@
       "mental_clarity": null,
       "introspection": null,
       "sleepH": null,
-      "sleepQ": null,
+      "sleepQ": 6,
       "notes": "",
       "habits": {
         "bkf_ate": false,
