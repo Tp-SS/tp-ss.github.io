@@ -36,7 +36,7 @@
         "noporn": false,
         "ent_interactive_consumed": false,
         "ent_interactive_q": 5,
-        "ent_visual_consumed": true,
+        "ent_visual_consumed": false,
         "ent_visual_q": 5,
         "ent_reading_consumed": false,
         "ent_reading_q": 5,
