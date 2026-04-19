@@ -38,7 +38,7 @@
         "ent_interactive_q": 5,
         "ent_visual_consumed": false,
         "ent_visual_q": 5,
-        "ent_reading_consumed": true,
+        "ent_reading_consumed": false,
         "ent_reading_q": 10,
         "ent_digital_consumed": true,
         "ent_digital_q": 10
