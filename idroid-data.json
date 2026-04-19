@@ -6,7 +6,7 @@
       "anxiety": null,
       "mental_clarity": null,
       "introspection": null,
-      "sleepH": null,
+      "sleepH": 7,
       "sleepQ": 6,
       "notes": "",
       "habits": {
